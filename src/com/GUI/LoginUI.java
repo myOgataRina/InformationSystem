@@ -6,8 +6,19 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentListener;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import com.util.*;
 
 public class LoginUI {
+    String user;
+    String pwd;
+    final String DBUSER = "root";
+    final String DBPWD = "root";
+
     private JFrame loginFrame = new JFrame("登陆界面");
     private ImageIcon picture = new ImageIcon("Resource/login.jpg");
     private GridBagConstraints gbc = new GridBagConstraints();
@@ -21,11 +32,14 @@ public class LoginUI {
     private JPasswordField passwordTF = new JPasswordField(20);
     private JPanel typeArea = new JPanel();
     private JLabel typeLabel = new JLabel("类  型");
-    final private String[] TYPE_OF_USER = new String[]{"客户","部门经理","员工"};
+    final private String[] TYPE_OF_USER = new String[]{"客户", "部门经理", "员工"};
     private JComboBox<String> type = new JComboBox<>(TYPE_OF_USER);
-    private String selectedType;
+    private String selectedType = "客户";
     private JPanel buttonArea = new JPanel();
     private JButton loginButton = new JButton("登录");
+    private JButton signUpButton = new JButton("注册");
+    SqlControler controler = new SqlControler();
+    Connection connection = controler.connectTo("jdbc:mysql://localhost:3306/informationsystem", DBUSER, DBPWD);
 
     private void init() {
 //        pictureArea.setBounds(200,200,200,200);
@@ -43,6 +57,8 @@ public class LoginUI {
         //按钮绑定监听器
         LoginListener ll = new LoginListener();
         loginButton.addActionListener(ll);
+        SignUpListener sul = new SignUpListener();
+        signUpButton.addActionListener(sul);
 
         //帐号密码输入区初始化
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -74,12 +90,12 @@ public class LoginUI {
         loginArea.add(passwordArea);
 
         //选择类型区域
-        typeArea.add(typeLabel,BorderLayout.WEST);
+        typeArea.add(typeLabel, BorderLayout.WEST);
         //加入ComboBox
         type.setMaximumRowCount(3);
         type.setSelectedIndex(0);
         type.addActionListener(e -> {
-            selectedType = (String)type.getSelectedItem();
+            selectedType = (String) type.getSelectedItem();
             System.out.println(selectedType);
         });
         typeArea.add(type);
@@ -101,7 +117,8 @@ public class LoginUI {
         gbc.gridheight = 1;
         gbc.weightx = 1;
         gbc.anchor = GridBagConstraints.NORTH;
-        buttonArea.add(loginButton);
+        buttonArea.add(loginButton, BorderLayout.WEST);
+        buttonArea.add(signUpButton, BorderLayout.EAST);
         //borderLayout自动居中，解决按键居中问题
         gb.setConstraints(buttonArea, gbc);
         loginArea.add(buttonArea);
@@ -122,11 +139,79 @@ public class LoginUI {
 
     //内部类实现监听事件
     private class LoginListener extends ComponentAdapter implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) throws RuntimeException {
             //此处添加监听事件响应
-            System.out.println("e = [" + e + "]");
-        }
+            System.out.println("登录中");
+            user = accountTF.getText();
+            pwd = new String(passwordTF.getPassword());
+            System.out.println("user = " + user + ", password = " + pwd + ".");
 
+
+            PreparedStatement preparedStatement = null;
+            try {
+                if (selectedType.equals("客户")) {
+                    preparedStatement = connection.prepareStatement("SELECT * FROM USER WHERE name=? AND password=? AND power='customer'");
+                    preparedStatement.setString(1, user);
+                    preparedStatement.setString(2, pwd);
+                } else if (selectedType.equals("部门经理")) {
+                    preparedStatement = connection.prepareStatement("SELECT * FROM USER WHERE name=? AND password=? AND power='manager'");
+                    preparedStatement.setString(1, user);
+                    preparedStatement.setString(2, pwd);
+                } else if (selectedType.equals("员工")) {
+                    preparedStatement = connection.prepareStatement("SELECT * FROM USER WHERE name=? AND password=? AND power='employee'");
+                    preparedStatement.setString(1, user);
+                    preparedStatement.setString(2, pwd);
+                } else {
+                    throw new RuntimeException();
+                }
+
+                ResultSet resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    //登录成功
+                    System.out.println("登录成功");
+                } else {
+                    //登录失败
+                    System.out.println("登录失败，账户名或密码错误，请重新再试。");
+                }
+
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            } catch (RuntimeException e2) {
+                System.out.println("类型选择错误");
+            }
+
+        }
+    }
+
+    private class SignUpListener extends ComponentAdapter implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            System.out.println("注册中");
+            selectedType = (String) type.getSelectedItem();
+            if (selectedType.equals("客户")) {
+                try {
+                    PreparedStatement preparedStatement = null;
+                    preparedStatement = connection.prepareStatement("INSERT INTO user(name , password, power) VALUES (?,?,\"customer\")");
+                    user = accountTF.getText();
+                    pwd = new String(passwordTF.getPassword());
+                    preparedStatement.setString(1, user);
+                    preparedStatement.setString(2, pwd);
+                    if(preparedStatement.executeUpdate() == 1){
+                        //弹出提示
+                        System.out.println("用户添加成功");
+                    } else {
+                        System.out.println("用户添加失败");
+                    }
+                } catch (SQLException e1) {
+                    //增加unique约束时，重复注册用户名会报错。
+                    e1.printStackTrace();
+                }
+
+            } else {
+                //弹出窗口显示非客户不能注册
+                System.out.println("注册权限不足，非客户用户请与总部联系。");
+            }
+        }
     }
 }
 
