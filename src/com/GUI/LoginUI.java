@@ -5,7 +5,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentListener;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,10 +13,10 @@ import java.sql.SQLException;
 import com.util.*;
 
 public class LoginUI {
-    String user;
-    String pwd;
-    final String DBUSER = "root";
-    final String DBPWD = "root";
+    private static String u_id;
+    private static String password;
+    final private String DBUSER = "root";
+    final private String DBPWD = "root";
 
     private JFrame loginFrame = new JFrame("登陆界面");
     private ImageIcon picture = new ImageIcon("Resource/login.jpg");
@@ -38,8 +37,8 @@ public class LoginUI {
     private JPanel buttonArea = new JPanel();
     private JButton loginButton = new JButton("登录");
     private JButton signUpButton = new JButton("注册");
-    SqlControler controler = new SqlControler();
-    Connection connection = controler.connectTo("jdbc:mysql://localhost:3306/informationsystem", DBUSER, DBPWD);
+    private SqlControler controler = new SqlControler();
+    private Connection connection = controler.connectTo("jdbc:mysql://localhost:3306/informationsystem", DBUSER, DBPWD);
 
     private void init() {
 //        pictureArea.setBounds(200,200,200,200);
@@ -142,25 +141,25 @@ public class LoginUI {
         public void actionPerformed(ActionEvent e) throws RuntimeException {
             //此处添加监听事件响应
             System.out.println("登录中");
-            user = accountTF.getText();
-            pwd = new String(passwordTF.getPassword());
-            System.out.println("user = " + user + ", password = " + pwd + ".");
+            u_id = accountTF.getText();
+            password = new String(passwordTF.getPassword());
+            System.out.println("u_id = " + u_id + ", password = " + password + ".");
 
 
             PreparedStatement preparedStatement = null;
             try {
                 if (selectedType.equals("客户")) {
-                    preparedStatement = connection.prepareStatement("SELECT * FROM USER WHERE name=? AND password=? AND power='customer'");
-                    preparedStatement.setString(1, user);
-                    preparedStatement.setString(2, pwd);
+                    preparedStatement = connection.prepareStatement("SELECT * FROM USER WHERE u_id=? AND password=? AND power='customer'");
+                    preparedStatement.setString(1, u_id);
+                    preparedStatement.setString(2, password);
                 } else if (selectedType.equals("部门经理")) {
-                    preparedStatement = connection.prepareStatement("SELECT * FROM USER WHERE name=? AND password=? AND power='manager'");
-                    preparedStatement.setString(1, user);
-                    preparedStatement.setString(2, pwd);
+                    preparedStatement = connection.prepareStatement("SELECT * FROM USER WHERE u_id=? AND password=? AND power='manager'");
+                    preparedStatement.setString(1, u_id);
+                    preparedStatement.setString(2, password);
                 } else if (selectedType.equals("员工")) {
-                    preparedStatement = connection.prepareStatement("SELECT * FROM USER WHERE name=? AND password=? AND power='employee'");
-                    preparedStatement.setString(1, user);
-                    preparedStatement.setString(2, pwd);
+                    preparedStatement = connection.prepareStatement("SELECT * FROM USER WHERE u_id=? AND password=? AND power='employee'");
+                    preparedStatement.setString(1, u_id);
+                    preparedStatement.setString(2, password);
                 } else {
                     throw new RuntimeException();
                 }
@@ -169,6 +168,8 @@ public class LoginUI {
                 if (resultSet.next()) {
                     //登录成功
                     System.out.println("登录成功");
+//                    loginFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
                 } else {
                     //登录失败
                     System.out.println("登录失败，账户名或密码错误，请重新再试。");
@@ -191,12 +192,12 @@ public class LoginUI {
             if (selectedType.equals("客户")) {
                 try {
                     PreparedStatement preparedStatement = null;
-                    preparedStatement = connection.prepareStatement("INSERT INTO user(name , password, power) VALUES (?,?,\"customer\")");
-                    user = accountTF.getText();
-                    pwd = new String(passwordTF.getPassword());
-                    preparedStatement.setString(1, user);
-                    preparedStatement.setString(2, pwd);
-                    if(preparedStatement.executeUpdate() == 1){
+                    preparedStatement = connection.prepareStatement("INSERT INTO user(u_id , password, power) VALUES (?,?,\"customer\")");
+                    u_id = accountTF.getText();
+                    password = new String(passwordTF.getPassword());
+                    preparedStatement.setString(1, u_id);
+                    preparedStatement.setString(2, password);
+                    if (preparedStatement.executeUpdate() == 1) {
                         //弹出提示
                         System.out.println("用户添加成功");
                     } else {
@@ -205,6 +206,7 @@ public class LoginUI {
                 } catch (SQLException e1) {
                     //增加unique约束时，重复注册用户名会报错。
                     e1.printStackTrace();
+                    System.out.println(e1.getMessage());
                 }
 
             } else {
