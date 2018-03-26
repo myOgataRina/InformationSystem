@@ -1,14 +1,26 @@
 package com.GUI;
 
+import com.main.Client;
+import com.util.ResultSetTableModel;
+import com.util.SqlControler;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.*;
 
-public class CustomerUI {
+public class CustomerUI extends OperationUI {
+    private PreparedStatement statement;
+    private ResultSet resultSet;
+
     private JFrame frame;
     private JTabbedPane tabbedPane;
     private JPanel myOrderPanel;
     private JPanel newOrderPanel;
     private JScrollPane queryPanel;
+    private ResultSetTableModel resultSetTableModel;
+    private JTable queryTable;
 
     //我的订单页面
     private JPanel searchPanel;
@@ -25,12 +37,14 @@ public class CustomerUI {
     private JTextField amountTextField;
     private JButton submitNewOrderButton;
 
+    @Override
     public void init() {
         frame = new JFrame("客户界面");
         tabbedPane = new JTabbedPane(JTabbedPane.TOP);
         myOrderPanel = new JPanel();
         newOrderPanel = new JPanel();
         queryPanel = new JScrollPane();
+
         searchPanel = new JPanel();
         combinePanel = new JPanel();
         searchString = new JLabel("订单商品编号或名称：");
@@ -43,14 +57,87 @@ public class CustomerUI {
         amountTextField = new JTextField(20);
         submitNewOrderButton = new JButton("提交新订单");
 
+        //查询按键绑定监听
+        queryButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("删除容器");
+                myOrderPanel.remove(queryPanel);
+                queryPanel.remove(queryTable);
+                System.out.println("查询");
+                Connection connection = SqlControler.getConnection();
+                try {
+                    PreparedStatement preparedStatement = connection.prepareStatement(
+                            "SELECT o_id , m_order.amount , m_order.g_id , g_name , o_time , status " +
+                                    "FROM m_order , good " +
+                                    "WHERE u_id=? AND m_order.g_id=good.g_id AND (g_name=? OR  m_order.g_id=?)");
+                    preparedStatement.setString(1,Client.u_id);
+                    preparedStatement.setString(2,searchField.getText());
+                    try {
+                        preparedStatement.setInt(3, Integer.valueOf(searchField.getText()));
+                    }catch (NumberFormatException e2){
+                        e2.printStackTrace();
+                        preparedStatement.setInt(3, 0);
+                    }
+                    resultSet = preparedStatement.executeQuery();
+                    resultSetTableModel = new ResultSetTableModel(resultSet);
+                    queryTable = new JTable(resultSetTableModel);
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+                System.out.println("添加容器");
+                queryPanel = new JScrollPane(queryTable);
+                myOrderPanel.add(queryPanel, BorderLayout.SOUTH);
+//                queryPanel.repaint();
+//                myOrderPanel.repaint();
+                frame.repaint();
+            }
+        });
+
+        //给searchPanel设置GridBagLayout
+        GridBagLayout gb = new GridBagLayout();
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.NONE;
+
+        combinePanel.setLayout(new BorderLayout());
         combinePanel.add(searchString, BorderLayout.WEST);
         combinePanel.add(searchField, BorderLayout.CENTER);
 
-        searchPanel.add(combinePanel, BorderLayout.CENTER);
-        searchPanel.add(queryButton, BorderLayout.NORTH);
 
-        myOrderPanel.add(searchPanel, BorderLayout.NORTH);
-        myOrderPanel.add(queryPanel, BorderLayout.CENTER);
+        searchPanel.setLayout(gb);
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.insets = new Insets(50, 20, 0, 20);
+        gb.setConstraints(combinePanel, gbc);
+        searchPanel.add(combinePanel);
+        gb.setConstraints(queryButton, gbc);
+        searchPanel.add(queryButton);
+        JSeparator separator = new JSeparator(JSeparator.HORIZONTAL);
+        Dimension d = separator.getPreferredSize();
+        separator.setPreferredSize(new Dimension(800, 50));
+        gbc.insets = new Insets(10, 0, 10, 0);
+        gb.setConstraints(separator, gbc);
+        searchPanel.add(separator);
+
+        {
+            Connection connection = SqlControler.getConnection();
+
+            try {
+                statement = connection.prepareStatement("SELECT o_id , m_order.amount , m_order.g_id , g_name , o_time , status " +
+                        "FROM m_order , good " +
+                        "WHERE u_id=? AND m_order.g_id=good.g_id ");
+                statement.setString(1, Client.u_id);
+                resultSet = statement.executeQuery();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        resultSetTableModel = new ResultSetTableModel(resultSet);
+        queryTable = new JTable(resultSetTableModel);
+        queryPanel = new JScrollPane(queryTable);
+
+        myOrderPanel.setLayout(new BorderLayout());
+        myOrderPanel.add(searchPanel, BorderLayout.CENTER);
+        myOrderPanel.add(queryPanel, BorderLayout.SOUTH);
 
         tabbedPane.add("我的订单", myOrderPanel);
         tabbedPane.add("新建订单", newOrderPanel);
