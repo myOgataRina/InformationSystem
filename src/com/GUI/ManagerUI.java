@@ -5,4 +5,9 @@ public class ManagerUI extends OperationUI {
     public void init() {
         super.init();
     }
+
+    @Override
+    public void run() {
+        super.run();
+    }
 }

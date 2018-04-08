@@ -18,7 +18,7 @@ public class SqlControler {
 //    final public static String DBPWD = "root";
 //    //jdbc:mysql://155.94.163.237:3306/informationsystem
 //    final public static String DB = "jdbc:mysql://" + IP + ":" + PORT + "/" + DATABASE;
-    //连接数据库
+
 //    public static Connection connectTo(String DB, String name, String pwd) {
 //        try {
 //            Class.forName("com.mysql.jdbc.Driver");
@@ -33,6 +33,7 @@ public class SqlControler {
 //        }
 //    }
 
+//连接数据库
     public static Connection getConnection() {
         if (connection == null) {
             try {

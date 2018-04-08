@@ -129,7 +129,7 @@ public class LoginUI {
 
     }
 
-    public static void main(String[] args) {
+    public static void main() {
         LoginUI loginUI = new LoginUI();
         loginUI.init();
     }
@@ -177,7 +177,7 @@ public class LoginUI {
                     } else {
                         operationUI = new OperationUI();
                     }
-                    operationUI.init();
+                    operationUI.run();
                 } else {
                     //登录失败
                     System.out.println("登录失败，账户名或密码错误，请重新再试。");
