@@ -1,25 +1,22 @@
 package com.GUI;
 
 import com.main.Client;
-import com.object.User;
 import com.util.ResultSetTableModel;
 import com.util.SqlControler;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
 
-public class CustomerUI extends OperationUI {
+public class EmployeeUI extends OperationUI {
     private static PreparedStatement statement;
     private static ResultSet resultSet;
 
     private static JFrame frame;
     private static JTabbedPane tabbedPane;
-    private static JPanel myOrderPanel;
+    private static JPanel OrderPanel;
     private static JPanel newOrderPanel;
     private static ResultSetTableModel resultSetTableModel;
     private static JTable queryTable;
@@ -27,9 +24,9 @@ public class CustomerUI extends OperationUI {
     //我的订单页面
     private JPanel searchPanel;
     private JPanel combinePanel;
-    private JLabel searchString;
+    private JLabel searchGoodLabel;
     private static JTextField searchField;
-    private static JScrollPane myOrderQueryPanel;
+    private static JScrollPane OrderQueryPanel;
 
     private JButton queryButton;
 
@@ -45,37 +42,26 @@ public class CustomerUI extends OperationUI {
     private JButton submitNewOrderButton;
     private static JScrollPane newOrderQueryPanel = new JScrollPane();
 
-    //个人信息修改界面
-    private static JPanel informationsPanel;
-    private static JLabel u_idLabel;
-    private static JLabel phoneLabel;
-    private static JLabel addressLabel;
-    private static JTextField phoneTextField;
-    private static JTextField addressTextField;
-    private static JButton changePasswordButton;
-    private static JButton changeInformationButton;
-
-
     @Override
     public void init() {
-        frame = new JFrame("客户界面");
+        frame = new JFrame("员工界面");
         tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-        myOrderPanel = new JPanel();
+        OrderPanel = new JPanel();
         newOrderPanel = new JPanel();
 
-        //我的订单标签初始化
+        //进行中订单标签初始化
         searchPanel = new JPanel();
         combinePanel = new JPanel();
-        searchString = new JLabel("订单商品编号或名称：");
+        searchGoodLabel = new JLabel("订单商品编号或名称：");
         searchField = new JTextField(20);
         queryButton = new JButton("查询");
-        myOrderQueryPanel = new JScrollPane();
+        OrderQueryPanel = new JScrollPane();
 
         //查询按键绑定监听
         queryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                CustomerUI.searchMyTable(searchField.getText());
+                EmployeeUI.searchMyTable(searchField.getText());
             }
         });
 
@@ -86,7 +72,7 @@ public class CustomerUI extends OperationUI {
         gbc.fill = GridBagConstraints.NONE;
 
         combinePanel.setLayout(new BorderLayout());
-        combinePanel.add(searchString, BorderLayout.WEST);
+        combinePanel.add(searchGoodLabel, BorderLayout.WEST);
         combinePanel.add(searchField, BorderLayout.CENTER);
 
 
@@ -103,15 +89,25 @@ public class CustomerUI extends OperationUI {
         gb.setConstraints(separator, gbc);
         searchPanel.add(separator);
 
-        myOrderPanel.setLayout(new BorderLayout());
-        myOrderPanel.add(searchPanel, BorderLayout.CENTER);
-        myOrderPanel.add(myOrderQueryPanel, BorderLayout.SOUTH);
+        OrderPanel.setLayout(new BorderLayout());
+        OrderPanel.add(searchPanel, BorderLayout.CENTER);
+        OrderPanel.add(OrderQueryPanel, BorderLayout.SOUTH);
 
-        {
-            queryTable = new JTable();
-            myOrderQueryPanel = new JScrollPane(queryTable);
-            showMyTableInNewOrder();
+
+        queryTable = new JTable();
+        OrderQueryPanel = new JScrollPane(queryTable);
+        Connection connection = SqlControler.getConnection();
+        try {
+            statement = connection.prepareStatement(
+                    "SELECT * FROM good ");
+            resultSet = statement.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+        resultSetTableModel = new ResultSetTableModel(resultSet);
+        queryTable = new JTable(resultSetTableModel);
+        newOrderQueryPanel = new JScrollPane(queryTable);
+
         //新建订单标签初始化
         submitNewOrderPanel = new JPanel();
         namePanel = new JPanel(new BorderLayout());
@@ -127,9 +123,9 @@ public class CustomerUI extends OperationUI {
         submitNewOrderButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                CustomerUI.addOrder();
-                CustomerUI.refreshGoodList();
-                CustomerUI.refreshMyOrderList();
+                EmployeeUI.addOrder();
+                EmployeeUI.refreshGoodList();
+                EmployeeUI.refreshMyOrderList();
             }
         });
         //GridBagLayout装载标签和文本框
@@ -172,82 +168,10 @@ public class CustomerUI extends OperationUI {
         newOrderPanel.add(submitNewOrderPanel, BorderLayout.CENTER);
         newOrderPanel.add(newOrderQueryPanel, BorderLayout.SOUTH);
 
-        //个人信息修改界面初始化
-        informationsPanel = new JPanel();
-        phoneLabel = new JLabel("电话");
-        phoneTextField = new JTextField(20);
-        addressLabel = new JLabel("地址");
-        addressTextField = new JTextField(20);
-        changeInformationButton = new JButton("更新信息");
-        changePasswordButton = new JButton("更改密码");
-
-        //按键绑定Listener
-        changePasswordButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                PasswordChangeUI passwordChangeUI = new PasswordChangeUI(Client.u_id);
-                passwordChangeUI.init();
-            }
-        });
-
-        changeInformationButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Connection connection = SqlControler.getConnection();
-                try {
-                    PreparedStatement preparedStatement = connection.prepareStatement("" +
-                            "UPDATE user " +
-                            "SET phone = ?, address = ? " +
-                            "WHERE u_id = ?");
-                    preparedStatement.setString(1, new String(phoneTextField.getText()));
-                    preparedStatement.setString(2, new String(addressTextField.getText()));
-                    preparedStatement.setString(3, Client.u_id);
-
-                    int i = preparedStatement.executeUpdate();
-                    if(i == 0){
-                        System.out.println("资料更新失败");
-                    } else {
-                        System.out.println("更新" + i + "条记录");
-                    }
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
-            }
-        });
-
-        User user = SqlControler.getUser(Client.u_id);
-        if (user != null) {
-            u_idLabel = new JLabel("目前登陆的用户：" + Client.u_id);
-            phoneTextField.setText(user.getPhone());
-            addressTextField.setText(user.getAddress());
-        }
-        informationsPanel.setLayout(gb);
-        gbc.insets = new Insets(20, 0, 0, 0);
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gb.setConstraints(u_idLabel, gbc);
-        informationsPanel.add(u_idLabel);
-        gbc.gridwidth = 1;
-        gb.setConstraints(phoneLabel, gbc);
-        informationsPanel.add(phoneLabel);
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gb.setConstraints(phoneTextField, gbc);
-        informationsPanel.add(phoneTextField);
-        gbc.gridwidth = 1;
-        gb.setConstraints(addressLabel, gbc);
-        informationsPanel.add(addressLabel);
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gb.setConstraints(addressTextField, gbc);
-        informationsPanel.add(addressTextField);
-
-        gb.setConstraints(changePasswordButton, gbc);
-        informationsPanel.add(changePasswordButton);
-        gb.setConstraints(changeInformationButton, gbc);
-        informationsPanel.add(changeInformationButton);
-
         //添加到tabbedPane
-        tabbedPane.add("我的订单", myOrderPanel);
+        tabbedPane.add("进行中的订单", OrderPanel);
         tabbedPane.add("新建订单", newOrderPanel);
-        tabbedPane.add("修改个人信息", informationsPanel);
+
         frame.add(tabbedPane);
         frame.pack();
         frame.setVisible(true);
@@ -257,40 +181,11 @@ public class CustomerUI extends OperationUI {
     public static void searchMyTable(String para) {
         System.out.println("searchMyTable.");
         if (para.equals("")) {
-//            myOrderQueryPanel.remove(queryTable);
-//            Connection connection = SqlControler.getConnection();
-//            try {
-//                PreparedStatement preparedStatement = connection.prepareStatement(
-//                        "SELECT o_id , m_order.amount , m_order.g_id , g_name , o_time , status " +
-//                                "FROM m_order , good " +
-//                                "WHERE u_id=?  AND m_order.g_id=good.g_id");
-//                preparedStatement.setString(1, Client.u_id);
-//                resultSet = preparedStatement.executeQuery();
-//                resultSetTableModel = new ResultSetTableModel(resultSet);
-//                queryTable = new JTable(resultSetTableModel);
-//            } catch (SQLException e1) {
-//                e1.printStackTrace();
-//            }
-            CustomerUI.refreshMyOrderList();
+            EmployeeUI.refreshMyOrderList();
         } else {
-            CustomerUI.searchMyOrder();
+            EmployeeUI.searchMyOrder();
         }
 
-    }
-
-    public static void showMyTableInNewOrder() {
-        Connection connection = SqlControler.getConnection();
-        try {
-            statement = connection.prepareStatement(
-                    "SELECT * " +
-                            "FROM good ");
-            resultSet = statement.executeQuery();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        resultSetTableModel = new ResultSetTableModel(resultSet);
-        queryTable = new JTable(resultSetTableModel);
-        newOrderQueryPanel = new JScrollPane(queryTable);
     }
 
     public static void addOrder() {
@@ -379,7 +274,7 @@ public class CustomerUI extends OperationUI {
     }
 
     public static void refreshMyOrderList() {
-        myOrderPanel.remove(myOrderQueryPanel);
+        OrderPanel.remove(OrderQueryPanel);
         Connection connection = SqlControler.getConnection();
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(
@@ -393,17 +288,17 @@ public class CustomerUI extends OperationUI {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        myOrderQueryPanel = new JScrollPane(queryTable);
-        myOrderPanel.add(myOrderQueryPanel, BorderLayout.SOUTH);
-        myOrderPanel.validate();
+        OrderQueryPanel = new JScrollPane(queryTable);
+        OrderPanel.add(OrderQueryPanel, BorderLayout.SOUTH);
+        OrderPanel.validate();
         tabbedPane.repaint();
         frame.repaint();
     }
 
     public static void searchMyOrder() {
         System.out.println("删除容器");
-//            myOrderPanel.remove(myOrderQueryPanel);
-        myOrderQueryPanel.remove(queryTable);
+//            OrderPanel.remove(OrderQueryPanel);
+        OrderQueryPanel.remove(queryTable);
         System.out.println("查询");
         Connection connection = SqlControler.getConnection();
         try {
@@ -423,10 +318,10 @@ public class CustomerUI extends OperationUI {
             resultSetTableModel = new ResultSetTableModel(resultSet);
             queryTable = new JTable(resultSetTableModel);
             System.out.println("添加容器");
-            myOrderQueryPanel = new JScrollPane(queryTable);
-            myOrderPanel.add(myOrderQueryPanel, BorderLayout.SOUTH);
-//                myOrderQueryPanel.repaint();
-//                myOrderPanel.repaint();
+            OrderQueryPanel = new JScrollPane(queryTable);
+            OrderPanel.add(OrderQueryPanel, BorderLayout.SOUTH);
+//                OrderQueryPanel.repaint();
+//                OrderPanel.repaint();
             tabbedPane.repaint();
             frame.repaint();
         } catch (SQLException e1) {
@@ -435,11 +330,10 @@ public class CustomerUI extends OperationUI {
     }
 
     public void run() {
-        CustomerUI UI = new CustomerUI();
+        EmployeeUI UI = new EmployeeUI();
         UI.init();
         searchMyTable(searchField.getText());
     }
 
 
 }
-

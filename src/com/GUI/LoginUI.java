@@ -173,7 +173,7 @@ public class LoginUI {
                     } else if (selectedType.equals("部门经理")) {
                         operationUI = new ManagerUI();
                     } else if (selectedType.equals("员工")) {
-                        operationUI = new employeeUI();
+                        operationUI = new EmployeeUI();
                     } else {
                         operationUI = new OperationUI();
                     }
