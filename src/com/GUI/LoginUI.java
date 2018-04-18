@@ -10,6 +10,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.GUI.customer.CustomerUI;
+import com.GUI.distributor.DistributorUI;
+import com.GUI.salesman.SalesmanUI;
+import com.GUI.storekeeper.StoreKeeperUI;
 import com.main.Client;
 import com.util.*;
 
@@ -30,7 +34,7 @@ public class LoginUI {
     private JPasswordField passwordTF = new JPasswordField(20);
     private JPanel typeArea = new JPanel();
     private JLabel typeLabel = new JLabel("类  型");
-    final private String[] TYPE_OF_USER = new String[]{"客户", "部门经理", "员工"};
+    final private String[] TYPE_OF_USER = new String[]{"客户", "部门经理", "业务员", "仓库管理员", "配送员"};
     private JComboBox<String> type = new JComboBox<>(TYPE_OF_USER);
     private String selectedType = "客户";
     private JPanel buttonArea = new JPanel();
@@ -154,8 +158,16 @@ public class LoginUI {
                     preparedStatement = connection.prepareStatement("SELECT * FROM USER WHERE u_id=? AND password=? AND power='manager'");
                     preparedStatement.setString(1, Client.u_id);
                     preparedStatement.setString(2, Client.password);
-                } else if (selectedType.equals("员工")) {
-                    preparedStatement = connection.prepareStatement("SELECT * FROM USER WHERE u_id=? AND password=? AND power='employee'");
+                } else if (selectedType.equals("业务员")) {
+                    preparedStatement = connection.prepareStatement("SELECT * FROM USER WHERE u_id=? AND password=? AND power='salesman'");
+                    preparedStatement.setString(1, Client.u_id);
+                    preparedStatement.setString(2, Client.password);
+                } else if (selectedType.equals("仓库管理员")) {
+                    preparedStatement = connection.prepareStatement("SELECT * FROM USER WHERE u_id=? AND password=? AND power='storekeeper'");
+                    preparedStatement.setString(1, Client.u_id);
+                    preparedStatement.setString(2, Client.password);
+                } else if (selectedType.equals("配送员")) {
+                    preparedStatement = connection.prepareStatement("SELECT * FROM USER WHERE u_id=? AND password=? AND power='distributor'");
                     preparedStatement.setString(1, Client.u_id);
                     preparedStatement.setString(2, Client.password);
                 } else {
@@ -172,8 +184,12 @@ public class LoginUI {
                         operationUI = new CustomerUI();
                     } else if (selectedType.equals("部门经理")) {
                         operationUI = new ManagerUI();
-                    } else if (selectedType.equals("员工")) {
-                        operationUI = new EmployeeUI();
+                    } else if (selectedType.equals("业务员")) {
+                        operationUI = new SalesmanUI();
+                    } else if (selectedType.equals("仓库管理员")) {
+                        operationUI = new StoreKeeperUI();
+                    } else if (selectedType.equals("配送员")) {
+                        operationUI = new DistributorUI();
                     } else {
                         operationUI = new OperationUI();
                     }

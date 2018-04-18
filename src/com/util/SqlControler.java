@@ -9,12 +9,12 @@ public class SqlControler {
     final public static String DBUSER = "root";
     final public static String DBPWD = "root";
     //    final public static String DB = "jdbc:mysql://localhost:3306/informationsystem";
-    final public static String DB = "jdbc:mysql://155.94.163.237:3306/informationsystem";
+    final public static String DB = "jdbc:mysql://23.83.224.59:3306/informationsystem";
 
 
     //连接数据库
     public static Connection getConnection() {
-        if (connection == null) {
+//        if (connection == null) {
             try {
                 Class.forName("com.mysql.jdbc.Driver");
                 connection = DriverManager.getConnection(DB, DBUSER, DBPWD);
@@ -28,9 +28,9 @@ public class SqlControler {
                 return null;
             }
             return connection;
-        } else {
-            return connection;
-        }
+//        } else {
+//            return connection;
+//        }
     }
 
     //从数据库获取用户信息，查无此人则返回NULL

@@ -1,13 +1,13 @@
-package com.GUI;
+package com.GUI.customer;
 
+import com.GUI.OperationUI;
+import com.GUI.PasswordChangeUI;
 import com.main.Client;
 import com.object.User;
 import com.util.ResultSetTableModel;
 import com.util.SqlControler;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -110,7 +110,7 @@ public class CustomerUI extends OperationUI {
         {
             queryTable = new JTable();
             myOrderQueryPanel = new JScrollPane(queryTable);
-            showMyTableInNewOrder();
+            showGoodsInNewOrder();
         }
         //新建订单标签初始化
         submitNewOrderPanel = new JPanel();
@@ -204,7 +204,7 @@ public class CustomerUI extends OperationUI {
                     preparedStatement.setString(3, Client.u_id);
 
                     int i = preparedStatement.executeUpdate();
-                    if(i == 0){
+                    if (i == 0) {
                         System.out.println("资料更新失败");
                     } else {
                         System.out.println("更新" + i + "条记录");
@@ -255,22 +255,8 @@ public class CustomerUI extends OperationUI {
     }
 
     public static void searchMyTable(String para) {
-        System.out.println("searchMyTable.");
+        System.out.println("searchTable.");
         if (para.equals("")) {
-//            myOrderQueryPanel.remove(queryTable);
-//            Connection connection = SqlControler.getConnection();
-//            try {
-//                PreparedStatement preparedStatement = connection.prepareStatement(
-//                        "SELECT o_id , m_order.amount , m_order.g_id , g_name , o_time , status " +
-//                                "FROM m_order , good " +
-//                                "WHERE u_id=?  AND m_order.g_id=good.g_id");
-//                preparedStatement.setString(1, Client.u_id);
-//                resultSet = preparedStatement.executeQuery();
-//                resultSetTableModel = new ResultSetTableModel(resultSet);
-//                queryTable = new JTable(resultSetTableModel);
-//            } catch (SQLException e1) {
-//                e1.printStackTrace();
-//            }
             CustomerUI.refreshMyOrderList();
         } else {
             CustomerUI.searchMyOrder();
@@ -278,7 +264,7 @@ public class CustomerUI extends OperationUI {
 
     }
 
-    public static void showMyTableInNewOrder() {
+    public static void showGoodsInNewOrder() {
         Connection connection = SqlControler.getConnection();
         try {
             statement = connection.prepareStatement(
@@ -290,6 +276,9 @@ public class CustomerUI extends OperationUI {
         }
         resultSetTableModel = new ResultSetTableModel(resultSet);
         queryTable = new JTable(resultSetTableModel);
+        queryTable.getColumnModel().getColumn(0).setHeaderValue("商品编号");
+        queryTable.getColumnModel().getColumn(1).setHeaderValue("商品名称");
+        queryTable.getColumnModel().getColumn(2).setHeaderValue("库存");
         newOrderQueryPanel = new JScrollPane(queryTable);
     }
 
@@ -329,7 +318,7 @@ public class CustomerUI extends OperationUI {
                         System.out.println(goodName + "库存不足，无法提交订单");
                     } else {
                         //更新新订单到数据库
-                        statement = connection.prepareStatement("INSERT INTO m_order(amount , g_id , u_id , o_time) " +
+                        statement = connection.prepareStatement("INSERT INTO m_order(amount , g_id , u_id , submit_time ) " +
                                 "VALUES( ? , ? , ? , ?)");
                         System.out.println("orderAmount:" + orderAmount + ", goodID:" + goodID + ", u_id:" + Client.u_id);
                         statement.setInt(1, orderAmount);
@@ -368,6 +357,9 @@ public class CustomerUI extends OperationUI {
             resultSet = preparedStatement.executeQuery();
             resultSetTableModel = new ResultSetTableModel(resultSet);
             queryTable = new JTable(resultSetTableModel);
+            queryTable.getColumnModel().getColumn(0).setHeaderValue("商品编号");
+            queryTable.getColumnModel().getColumn(1).setHeaderValue("商品名称");
+            queryTable.getColumnModel().getColumn(2).setHeaderValue("库存");
         } catch (SQLException e1) {
             e1.printStackTrace();
         }
@@ -383,13 +375,23 @@ public class CustomerUI extends OperationUI {
         Connection connection = SqlControler.getConnection();
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "SELECT o_id , m_order.amount , m_order.g_id , g_name , o_time , status " +
+                    "SELECT o_id ,  m_order.g_id , g_name , m_order.amount , status , submit_time , confirm_time , emit_time , receipt_time  " +
                             "FROM m_order , good " +
                             "WHERE u_id=?  AND m_order.g_id=good.g_id");
             preparedStatement.setString(1, Client.u_id);
             resultSet = preparedStatement.executeQuery();
             resultSetTableModel = new ResultSetTableModel(resultSet);
             queryTable = new JTable(resultSetTableModel);
+            queryTable.getColumnModel().getColumn(0).setHeaderValue("订单编号");
+            queryTable.getColumnModel().getColumn(1).setHeaderValue("商品编号");
+            queryTable.getColumnModel().getColumn(2).setHeaderValue("商品名称");
+            queryTable.getColumnModel().getColumn(3).setHeaderValue("订购数量");
+            queryTable.getColumnModel().getColumn(4).setHeaderValue("订单状态");
+            queryTable.getColumnModel().getColumn(5).setHeaderValue("提交时间");
+            queryTable.getColumnModel().getColumn(6).setHeaderValue("订单确认时间");
+            queryTable.getColumnModel().getColumn(7).setHeaderValue("订单发货时间");
+            queryTable.getColumnModel().getColumn(8).setHeaderValue("订单收货时间");
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -408,7 +410,7 @@ public class CustomerUI extends OperationUI {
         Connection connection = SqlControler.getConnection();
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "SELECT o_id , m_order.amount , m_order.g_id , g_name , o_time , status " +
+                    "SELECT o_id ,  m_order.g_id , g_name , m_order.amount , status , submit_time , confirm_time , emit_time , receipt_time " +
                             "FROM m_order , good " +
                             "WHERE u_id=? AND m_order.g_id=good.g_id AND (g_name=? OR  m_order.g_id=?)");
             preparedStatement.setString(1, Client.u_id);
@@ -422,6 +424,15 @@ public class CustomerUI extends OperationUI {
             resultSet = preparedStatement.executeQuery();
             resultSetTableModel = new ResultSetTableModel(resultSet);
             queryTable = new JTable(resultSetTableModel);
+            queryTable.getColumnModel().getColumn(0).setHeaderValue("订单编号");
+            queryTable.getColumnModel().getColumn(1).setHeaderValue("商品编号");
+            queryTable.getColumnModel().getColumn(2).setHeaderValue("商品名称");
+            queryTable.getColumnModel().getColumn(3).setHeaderValue("订购数量");
+            queryTable.getColumnModel().getColumn(4).setHeaderValue("订单状态");
+            queryTable.getColumnModel().getColumn(5).setHeaderValue("提交时间");
+            queryTable.getColumnModel().getColumn(6).setHeaderValue("订单确认时间");
+            queryTable.getColumnModel().getColumn(7).setHeaderValue("订单发货时间");
+            queryTable.getColumnModel().getColumn(8).setHeaderValue("订单收货时间");
             System.out.println("添加容器");
             myOrderQueryPanel = new JScrollPane(queryTable);
             myOrderPanel.add(myOrderQueryPanel, BorderLayout.SOUTH);
