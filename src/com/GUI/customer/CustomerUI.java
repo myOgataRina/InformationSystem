@@ -1,7 +1,8 @@
 package com.GUI.customer;
 
 import com.GUI.OperationUI;
-import com.GUI.PasswordChangeUI;
+import com.GUI.university.ChangeInformationPanel;
+import com.GUI.university.PasswordChangeUI;
 import com.main.Client;
 import com.object.User;
 import com.util.ResultSetTableModel;
@@ -46,15 +47,7 @@ public class CustomerUI extends OperationUI {
     private static JScrollPane newOrderQueryPanel = new JScrollPane();
 
     //个人信息修改界面
-    private static JPanel informationsPanel;
-    private static JLabel u_idLabel;
-    private static JLabel phoneLabel;
-    private static JLabel addressLabel;
-    private static JTextField phoneTextField;
-    private static JTextField addressTextField;
-    private static JButton changePasswordButton;
-    private static JButton changeInformationButton;
-
+    private ChangeInformationPanel informationsPanel = new ChangeInformationPanel();
 
     @Override
     public void init() {
@@ -172,77 +165,9 @@ public class CustomerUI extends OperationUI {
         newOrderPanel.add(submitNewOrderPanel, BorderLayout.CENTER);
         newOrderPanel.add(newOrderQueryPanel, BorderLayout.SOUTH);
 
-        //个人信息修改界面初始化
-        informationsPanel = new JPanel();
-        phoneLabel = new JLabel("电话");
-        phoneTextField = new JTextField(20);
-        addressLabel = new JLabel("地址");
-        addressTextField = new JTextField(20);
-        changeInformationButton = new JButton("更新信息");
-        changePasswordButton = new JButton("更改密码");
-
-        //按键绑定Listener
-        changePasswordButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                PasswordChangeUI passwordChangeUI = new PasswordChangeUI(Client.u_id);
-                passwordChangeUI.init();
-            }
-        });
-
-        changeInformationButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Connection connection = SqlControler.getConnection();
-                try {
-                    PreparedStatement preparedStatement = connection.prepareStatement("" +
-                            "UPDATE user " +
-                            "SET phone = ?, address = ? " +
-                            "WHERE u_id = ?");
-                    preparedStatement.setString(1, new String(phoneTextField.getText()));
-                    preparedStatement.setString(2, new String(addressTextField.getText()));
-                    preparedStatement.setString(3, Client.u_id);
-
-                    int i = preparedStatement.executeUpdate();
-                    if (i == 0) {
-                        System.out.println("资料更新失败");
-                    } else {
-                        System.out.println("更新" + i + "条记录");
-                    }
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
-            }
-        });
-
-        User user = SqlControler.getUser(Client.u_id);
-        if (user != null) {
-            u_idLabel = new JLabel("目前登陆的用户：" + Client.u_id);
-            phoneTextField.setText(user.getPhone());
-            addressTextField.setText(user.getAddress());
-        }
-        informationsPanel.setLayout(gb);
-        gbc.insets = new Insets(20, 0, 0, 0);
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gb.setConstraints(u_idLabel, gbc);
-        informationsPanel.add(u_idLabel);
-        gbc.gridwidth = 1;
-        gb.setConstraints(phoneLabel, gbc);
-        informationsPanel.add(phoneLabel);
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gb.setConstraints(phoneTextField, gbc);
-        informationsPanel.add(phoneTextField);
-        gbc.gridwidth = 1;
-        gb.setConstraints(addressLabel, gbc);
-        informationsPanel.add(addressLabel);
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gb.setConstraints(addressTextField, gbc);
-        informationsPanel.add(addressTextField);
-
-        gb.setConstraints(changePasswordButton, gbc);
-        informationsPanel.add(changePasswordButton);
-        gb.setConstraints(changeInformationButton, gbc);
-        informationsPanel.add(changeInformationButton);
+        //更改信息按键添加功能
+        informationsPanel.setChangeInformationButtonListener();
+        informationsPanel.setChangePasswordButtonListener();
 
         //添加到tabbedPane
         tabbedPane.add("我的订单", myOrderPanel);

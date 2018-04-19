@@ -1,4 +1,4 @@
-package com.GUI;
+package com.GUI.university;
 
 import com.util.SqlControler;
 
@@ -22,7 +22,8 @@ public class PasswordChangeUI {
     private static JPasswordField repeatNewPasswordTextField = new JPasswordField(20);
     private static JButton changePasswordButton = new JButton("更改密码");
 
-    public void init() {
+    public PasswordChangeUI(String u_id) {
+        this.u_id = u_id;
         GridBagLayout gb = new GridBagLayout();
         panel.setLayout(gb);
         GridBagConstraints gbc = new GridBagConstraints();
@@ -73,15 +74,6 @@ public class PasswordChangeUI {
         frame.setVisible(true);
     }
 
-//    public static void main(String[] args) {
-//        PasswordChangeUI passwordChangeUI = new PasswordChangeUI("customer");
-//        passwordChangeUI.init();
-//    }
-
-    public PasswordChangeUI(String u_id) {
-        this.u_id = u_id;
-    }
-
     public static void changePassword(String userID, String oldPassword, String newPassword) {
         Connection connection = SqlControler.getConnection();
         try {
@@ -94,7 +86,7 @@ public class PasswordChangeUI {
             preparedStatement.setString(3, oldPassword);
             int i = preparedStatement.executeUpdate();
             if(i==0){
-                System.out.println("重置密码失败，请重新再试");
+                System.out.println("旧密码错误，重置密码失败，请重新再试");
             }
             System.out.println("更新了" + i + "条记录");
         } catch (SQLException e) {
