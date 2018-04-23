@@ -1,8 +1,15 @@
 package com.GUI.storekeeper;
 
+import com.util.ResultSetTableModel;
+import com.util.SqlControler;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class EntryOrExitPanel extends JPanel {
     private JTextField goodNameTextField = new JTextField(50);
@@ -11,6 +18,8 @@ public class EntryOrExitPanel extends JPanel {
     private JTextField contactTextField = new JTextField(20);
     private JTextField contactPhoneTextField = new JTextField(20);
     private JButton button;
+    private JTable table = new JTable();
+    ResultSetTableModel resultSetTableModel;
 
     public EntryOrExitPanel(boolean isEntry) {
         if (isEntry) {
@@ -18,6 +27,7 @@ public class EntryOrExitPanel extends JPanel {
         } else {
             button = new JButton("确认出库");
         }
+        JPanel containerPanel = new JPanel();
         JLabel goodNameLabel = new JLabel("商品名称：");
         JLabel goodAmountLabel = new JLabel("商品数量：");
         JLabel goodPriceLabel = new JLabel("商品价格：");
@@ -27,61 +37,93 @@ public class EntryOrExitPanel extends JPanel {
 
         GridBagLayout gb = new GridBagLayout();
         GridBagConstraints gbc = new GridBagConstraints();
-        this.setLayout(gb);
+        containerPanel.setLayout(gb);
         gbc.insets = new Insets(30, 10, 0, 10);
         gbc.gridwidth = 1;
         gb.setConstraints(goodNameLabel, gbc);
-        this.add(goodNameLabel);
+        containerPanel.add(goodNameLabel);
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gb.setConstraints(goodNameTextField, gbc);
-        this.add(goodNameTextField);
+        containerPanel.add(goodNameTextField);
         gbc.gridwidth = 1;
+
         gb.setConstraints(goodAmountLabel, gbc);
-        this.add(goodAmountLabel);
+        containerPanel.add(goodAmountLabel);
         gb.setConstraints(goodAmountTextField, gbc);
-        this.add(goodAmountTextField);
+        containerPanel.add(goodAmountTextField);
         gb.setConstraints(goodPriceLabel, gbc);
-        this.add(goodPriceLabel);
+        containerPanel.add(goodPriceLabel);
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gb.setConstraints(goodPriceTextField, gbc);
-        this.add(goodPriceTextField);
+        containerPanel.add(goodPriceTextField);
         gbc.gridwidth = 1;
         gb.setConstraints(contactLabel, gbc);
-        this.add(contactLabel);
-        ;
+        containerPanel.add(contactLabel);
+
         gb.setConstraints(contactTextField, gbc);
-        this.add(contactTextField);
+        containerPanel.add(contactTextField);
         gb.setConstraints(contactPhoneLabel, gbc);
-        this.add(contactPhoneLabel);
+        containerPanel.add(contactPhoneLabel);
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gb.setConstraints(contactPhoneTextField, gbc);
-        this.add(contactPhoneTextField);
+        containerPanel.add(contactPhoneTextField);
+        gbc.insets = new Insets(30, 10, 40, 10);
         gb.setConstraints(button, gbc);
-        this.add(button);
+        containerPanel.add(button);
+
+        JSeparator separator = new JSeparator(JSeparator.HORIZONTAL);
+        separator.setPreferredSize(new Dimension(800, 50));
+
+        ResultSet resultSet;
+        JScrollPane jScrollPane = new JScrollPane();
+        Connection connection = SqlControler.getConnection();
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("" +
+                    "SELECT * FROM good");
+            resultSet = preparedStatement.executeQuery();
+            resultSetTableModel = new ResultSetTableModel(resultSet);
+            table = new JTable(resultSetTableModel);
+            table.getColumnModel().getColumn(0).setHeaderValue("商品编号");
+            table.getColumnModel().getColumn(1).setHeaderValue("商品名称");
+            table.getColumnModel().getColumn(2).setHeaderValue("库存");
+            jScrollPane = new JScrollPane(table);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+        this.setLayout(new BorderLayout());
+        this.add(containerPanel, BorderLayout.NORTH);
+        this.add(separator, BorderLayout.CENTER);
+        this.add(jScrollPane, BorderLayout.SOUTH);
     }
 
-    public void setButtonListener(ActionListener listener){
+    public void setButtonListener(ActionListener listener) {
         button.addActionListener(listener);
     }
 
-    public String getGoodName(){
+    public String getGoodName() {
         return goodNameTextField.getText();
     }
 
-    public String getGoodAmount(){
+    public String getGoodAmount() {
         return goodAmountTextField.getText();
     }
 
-    public String getPrice(){
+    public String getPrice() {
         return goodPriceTextField.getText();
     }
 
-    public String getContact(){
+    public String getContact() {
         return contactTextField.getText();
     }
 
-    public String getContactPhone(){
+    public String getContactPhone() {
         return contactPhoneTextField.getText();
+    }
+
+    public JTable getTable() {
+        return table;
     }
 
     public static void main(String[] args) {

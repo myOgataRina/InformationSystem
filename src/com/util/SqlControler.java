@@ -56,4 +56,36 @@ public class SqlControler {
 
         return user;
     }
+
+    public static class Storehouse {
+        public static void entry(int g_id, int r_amount, float price, String r_name, String r_phone, String u_id) throws SQLException {
+            Connection connection = getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement("" +
+                    "INSERT INTO exit_and_entry( g_id , r_amount , price , r_name , r_phone , ExitOrEntry , u_id , r_time) " +
+                    "VALUES(? , ? , ? , ? , ? , 'Entry' , ? , ? )");
+            preparedStatement.setInt(1, g_id);
+            preparedStatement.setInt(2, r_amount);
+            preparedStatement.setFloat(3, price);
+            preparedStatement.setString(4, r_name);
+            preparedStatement.setString(5, r_phone);
+            preparedStatement.setString(6, u_id);
+            preparedStatement.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+            preparedStatement.executeUpdate();
+        }
+
+        public static void exit(int g_id, int r_amount, float price, String r_name, String r_phone, String u_id) throws SQLException {
+            Connection connection = getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement("" +
+                    "INSERT INTO exit_and_entry( g_id , r_amount , price , r_name , r_phone , ExitOrEntry , u_id , r_time) " +
+                    "VALUES(? , ? , ? , ? , ? , 'Exit' , ? , ? )");
+            preparedStatement.setInt(1, g_id);
+            preparedStatement.setInt(2, r_amount);
+            preparedStatement.setFloat(3, price);
+            preparedStatement.setString(4, r_name);
+            preparedStatement.setString(5, r_phone);
+            preparedStatement.setString(6, u_id);
+            preparedStatement.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+            preparedStatement.executeUpdate();
+        }
+    }
 }
