@@ -96,8 +96,6 @@ public class CustomerUI extends OperationUI {
         table.getColumnModel().getColumn(2).setHeaderValue("商品名称");
         table.getColumnModel().getColumn(3).setHeaderValue("订单商品数量");
         table.getColumnModel().getColumn(4).setHeaderValue("订单状态");
-        preparedStatement.close();
-        connection.close();
     }
 
     private void addMyOrder() throws SQLException {
@@ -122,8 +120,6 @@ public class CustomerUI extends OperationUI {
             amount = resultSet.getInt(2);
         } else {
             System.out.println("查询不到该商品，请确认后重试");
-            preparedStatement.close();
-            connection.close();
             return;
         }
 
@@ -149,13 +145,9 @@ public class CustomerUI extends OperationUI {
             preparedStatement.setString(3, goodName);
             i = preparedStatement.executeUpdate();
             System.out.println("更新" + i + "条库存信息");
-            preparedStatement.close();
-            connection.close();
             return;
         } else {
             System.out.println("商品库存不足，新建订单失败");
-            preparedStatement.close();
-            connection.close();
             return;
         }
 
@@ -180,8 +172,6 @@ public class CustomerUI extends OperationUI {
         table.getColumnModel().getColumn(2).setHeaderValue("商品名称");
         table.getColumnModel().getColumn(3).setHeaderValue("订单商品数量");
         table.getColumnModel().getColumn(4).setHeaderValue("订单状态");
-        preparedStatement.close();
-        connection.close();
     }
 
     private void refreshGoodList() throws SQLException {
@@ -198,8 +188,6 @@ public class CustomerUI extends OperationUI {
         table.getColumnModel().getColumn(0).setHeaderValue("商品编号");
         table.getColumnModel().getColumn(1).setHeaderValue("商品名称");
         table.getColumnModel().getColumn(2).setHeaderValue("商品库存");
-        preparedStatement.close();
-        connection.close();
     }
 
     @Override

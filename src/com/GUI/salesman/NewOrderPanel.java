@@ -1,4 +1,4 @@
-package com.GUI.customer;
+package com.GUI.salesman;
 
 import com.util.ResultSetTableModel;
 import com.util.SqlControler;
@@ -11,34 +11,43 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class AddMyOrderPanel extends JPanel {
+public class NewOrderPanel extends JPanel {
+    private JTextField userIDTextField = new JTextField(20);
     private JTextField goodNameTextField = new JTextField(20);
     private JTextField goodAmountTextField = new JTextField(20);
     private JButton button = new JButton("提交订单");
     private JTable table = new JTable();
 
-    public AddMyOrderPanel() {
+    public NewOrderPanel(){
+        JLabel userIDLabel = new JLabel("订单收货人：");
+        JLabel goodNameLabel = new JLabel("订购商品名称：");
+        JLabel goodAmountLabel = new JLabel("订购数量：");
+
         GridBagLayout gb = new GridBagLayout();
         GridBagConstraints gbc = new GridBagConstraints();
-        JPanel containerPanel = new JPanel(gb);
-        JLabel goodNameLabel = new JLabel("订购商品名称");
-        JLabel goodAmountLabel = new JLabel("订购商品数量");
+        JPanel containPanel = new JPanel(gb);
         gbc.insets = new Insets(40, 0, 0, 0);
         gbc.gridwidth = 1;
+        gb.setConstraints(userIDLabel, gbc);
+        containPanel.add(userIDLabel);
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gb.setConstraints(userIDTextField, gbc);
+        containPanel.add(userIDTextField);
+        gbc.gridwidth = 1;
         gb.setConstraints(goodNameLabel, gbc);
-        containerPanel.add(goodNameLabel);
+        containPanel.add(goodNameLabel);
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gb.setConstraints(goodNameTextField, gbc);
-        containerPanel.add(goodNameTextField);
+        containPanel.add(goodNameTextField);
         gbc.gridwidth = 1;
         gb.setConstraints(goodAmountLabel, gbc);
-        containerPanel.add(goodAmountLabel);
+        containPanel.add(goodAmountLabel);
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gb.setConstraints(goodAmountTextField, gbc);
-        containerPanel.add(goodAmountTextField);
+        containPanel.add(goodAmountTextField);
         gbc.insets = new Insets(40, 0, 40, 0);
         gb.setConstraints(button, gbc);
-        containerPanel.add(button);
+        containPanel.add(button);
 
         JSeparator separator = new JSeparator(JSeparator.HORIZONTAL);
         separator.setPreferredSize(new Dimension(800, 50));
@@ -51,26 +60,23 @@ public class AddMyOrderPanel extends JPanel {
             ResultSet resultSet = preparedStatement.executeQuery();
             ResultSetTableModel resultSetTableModel = new ResultSetTableModel(resultSet);
             table = new JTable(resultSetTableModel);
-            table.getColumnModel().getColumn(0).setHeaderValue("商品编号");
+            table.getColumnModel().getColumn(0).setHeaderValue("商品订单");
             table.getColumnModel().getColumn(1).setHeaderValue("商品名称");
             table.getColumnModel().getColumn(2).setHeaderValue("商品库存");
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        JScrollPane goodListScrollPane = new JScrollPane(table);
+        JScrollPane goodListPanel = new JScrollPane(table);
 
         this.setLayout(new BorderLayout());
-        this.add(containerPanel, BorderLayout.NORTH);
+        this.add(containPanel, BorderLayout.NORTH);
         this.add(separator, BorderLayout.CENTER);
-        this.add(goodListScrollPane, BorderLayout.SOUTH);
+        this.add(goodListPanel, BorderLayout.SOUTH);
     }
 
-    public void setButtonListener(ActionListener listener) {
-        this.button.addActionListener(listener);
-    }
-
-    public JTable getTable() {
-        return table;
+    public String getUserID(){
+        return this.userIDTextField.getText();
     }
 
     public String getGoodName(){
@@ -81,10 +87,17 @@ public class AddMyOrderPanel extends JPanel {
         return this.goodAmountTextField.getText();
     }
 
+    public JTable getTable() {
+        return table;
+    }
+
+    public void setButtonListener(ActionListener listener){
+        this.button.addActionListener(listener);
+    }
+
     public static void main(String[] args) {
         JFrame frame = new JFrame();
-        AddMyOrderPanel addMyOrderPanel = new AddMyOrderPanel();
-        frame.add(addMyOrderPanel);
+        frame.add(new NewOrderPanel());
         frame.pack();
         frame.setVisible(true);
     }
