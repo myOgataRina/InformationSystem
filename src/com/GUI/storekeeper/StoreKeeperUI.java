@@ -203,7 +203,7 @@ public class StoreKeeperUI extends OperationUI {
         } else {
             preparedStatement = connection.prepareStatement("" +
                     "UPDATE m_order " +
-                    "set status=? , confirm_time=? " +
+                    "set status=? , ship_time=? " +
                     "WHERE o_id=?");
             preparedStatement.setString(1, "订单已出仓");
             preparedStatement.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
@@ -240,7 +240,7 @@ public class StoreKeeperUI extends OperationUI {
         }
     }
 
-    private void refreshGoodList(){
+    private void refreshGoodList() {
         Connection connection = SqlControler.getConnection();
         PreparedStatement preparedStatement;
         try {
@@ -267,53 +267,122 @@ public class StoreKeeperUI extends OperationUI {
     }
 
     private void entry() {
-        int g_id;
-        int amount;//原来的库存
-        int r_amount;//入库新增数量
-        float price;
-        String goodName = entryPanel.getGoodName();
-        String r_name = entryPanel.getContact();
-        String r_phone = entryPanel.getContactPhone();
-        try {
-            Connection connection = SqlControler.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement("" +
-                    "SELECT * FROM good " +
-                    "WHERE g_name = ? ");
-            preparedStatement.setString(1, goodName);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                g_id = resultSet.getInt(1);
-                amount = resultSet.getInt(3);
-                try {
-                    r_amount = Integer.valueOf(entryPanel.getGoodAmount());
-                    try {
-                        price = Float.valueOf(entryPanel.getPrice());
-                        SqlControler.Storehouse.entry(g_id, r_amount, price, r_name, r_phone, Client.u_id);
-                        System.out.println("成功添加一条入库记录");
-
-                        amount = amount + r_amount;
-                        System.out.println("g_id = " + g_id + " amount = " + amount);
-                        preparedStatement = connection.prepareStatement("" +
-                                "UPDATE good " +
-                                "SET amount=? " +
-                                "WHERE g_id=?");
-                        preparedStatement.setInt(1, amount);
-                        preparedStatement.setInt(2, g_id);
-                        int i = preparedStatement.executeUpdate();
-                        System.out.println("更新" + i + "条库存信息");
-
-                    } catch (NumberFormatException e1) {
-                        System.out.println("价格输入错误，请输入正确的数字");
-                    }
-                } catch (NumberFormatException ex) {
-                    ex.printStackTrace();
-                    System.out.println("商品数额输入错误，请输出正确的数字");
-                }
-            } else {
-                System.out.println("查询不到该商品");
+        if (this.entryPanel.isNewGood()) {
+            int g_id = 0;
+            String goodName = entryPanel.getGoodName();
+            int r_amount = 0;
+            float price = 0;
+            String r_name = entryPanel.getContact();
+            String r_phone = entryPanel.getContactPhone();
+            try {
+                r_amount = Integer.valueOf(this.entryPanel.getGoodAmount());//入库数量
+            } catch (NumberFormatException e) {
+                System.out.println("请输入正确的商品数量");
+                e.printStackTrace();
+                return;
             }
-        } catch (SQLException e2) {
-            e2.printStackTrace();
+            try{
+                price = Float.valueOf(entryPanel.getPrice());
+            }catch (NumberFormatException e){
+                System.out.println("请输入正确的商品价格");
+                e.printStackTrace();
+                return;
+            }
+            Connection connection = SqlControler.getConnection();
+            try {
+                PreparedStatement preparedStatement = connection.prepareStatement("" +
+                        "SELECT * FROM good WHERE g_name=?");
+                preparedStatement.setString(1, goodName);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    System.out.println("商品已存在，请选择旧商品进行入库");
+                    return;
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                PreparedStatement preparedStatement = connection.prepareStatement("" +
+                        "INSERT INTO good(g_name , amount) " +
+                        "VALUES( ? , ? )");
+                preparedStatement.setString(1, goodName);
+                preparedStatement.setInt(2, r_amount);
+                int i = preparedStatement.executeUpdate();
+                System.out.println("更新了" + i + "条商品信息");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                PreparedStatement preparedStatement = connection.prepareStatement("" +
+                        "SELECT * FROM good WHERE g_name=?");
+                preparedStatement.setString(1, goodName);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    g_id = resultSet.getInt(1);
+                    System.out.println("g_id = " + g_id);
+                } else{
+                    System.out.println("新商品查询商品编号失败");
+                    return;
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                SqlControler.Storehouse.entry(g_id,r_amount,price,r_name,r_phone, Client.u_id);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+
+        } else {
+            int g_id;
+            int amount;//原来的库存
+            int r_amount;//入库新增数量
+            float price;
+            String goodName = entryPanel.getGoodName();
+            String r_name = entryPanel.getContact();
+            String r_phone = entryPanel.getContactPhone();
+            try {
+                Connection connection = SqlControler.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement("" +
+                        "SELECT * FROM good " +
+                        "WHERE g_name = ? ");
+                preparedStatement.setString(1, goodName);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    g_id = resultSet.getInt(1);
+                    amount = resultSet.getInt(3);
+                    try {
+                        r_amount = Integer.valueOf(entryPanel.getGoodAmount());
+                        try {
+                            price = Float.valueOf(entryPanel.getPrice());
+                            SqlControler.Storehouse.entry(g_id, r_amount, price, r_name, r_phone, Client.u_id);
+                            System.out.println("成功添加一条入库记录");
+
+                            amount = amount + r_amount;
+                            System.out.println("g_id = " + g_id + " amount = " + amount);
+                            preparedStatement = connection.prepareStatement("" +
+                                    "UPDATE good " +
+                                    "SET amount=? " +
+                                    "WHERE g_id=?");
+                            preparedStatement.setInt(1, amount);
+                            preparedStatement.setInt(2, g_id);
+                            int i = preparedStatement.executeUpdate();
+                            System.out.println("更新" + i + "条库存信息");
+
+                        } catch (NumberFormatException e1) {
+                            System.out.println("价格输入错误，请输入正确的数字");
+                        }
+                    } catch (NumberFormatException ex) {
+                        ex.printStackTrace();
+                        System.out.println("商品数额输入错误，请输出正确的数字");
+                    }
+                } else {
+                    System.out.println("查询不到该商品");
+                }
+            } catch (SQLException e2) {
+                e2.printStackTrace();
+            }
         }
     }
 
@@ -337,7 +406,7 @@ public class StoreKeeperUI extends OperationUI {
                 amount = resultSet.getInt(3);
                 try {
                     r_amount = Integer.valueOf(exitPanel.getGoodAmount());
-                    if(amount < r_amount){
+                    if (amount < r_amount) {
                         System.out.println("商品库存不足");
                         return;
                     }

@@ -93,7 +93,7 @@ public class LoginUI {
         //选择类型区域
         typeArea.add(typeLabel, BorderLayout.WEST);
         //加入ComboBox
-        type.setMaximumRowCount(3);
+        type.setMaximumRowCount(5);
         type.setSelectedIndex(0);
         type.addActionListener(e -> {
             selectedType = (String) type.getSelectedItem();

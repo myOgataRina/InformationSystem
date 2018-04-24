@@ -19,7 +19,9 @@ public class EntryOrExitPanel extends JPanel {
     private JTextField contactPhoneTextField = new JTextField(20);
     private JButton button;
     private JTable table = new JTable();
-    ResultSetTableModel resultSetTableModel;
+    private ResultSetTableModel resultSetTableModel;
+    final private String[] IS_NEW_GOOD = new String[]{"否", "是"};
+    private JComboBox<String> isNewGoodBox = new JComboBox<>(IS_NEW_GOOD);
 
     public EntryOrExitPanel(boolean isEntry) {
         if (isEntry) {
@@ -42,11 +44,23 @@ public class EntryOrExitPanel extends JPanel {
         gbc.gridwidth = 1;
         gb.setConstraints(goodNameLabel, gbc);
         containerPanel.add(goodNameLabel);
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gb.setConstraints(goodNameTextField, gbc);
-        containerPanel.add(goodNameTextField);
-        gbc.gridwidth = 1;
+        if (isEntry) {
+            goodNameTextField = new JTextField(20);
+            gb.setConstraints(goodNameTextField, gbc);
+            containerPanel.add(goodNameTextField);
+            JLabel isNewGoodLabel = new JLabel("是否为新商品：");
+            gb.setConstraints(isNewGoodLabel, gbc);
+            containerPanel.add(isNewGoodLabel);
+            gbc.gridwidth = GridBagConstraints.REMAINDER;
+            gb.setConstraints(isNewGoodBox, gbc);
+            containerPanel.add(isNewGoodBox);
+        } else {
+            gbc.gridwidth = GridBagConstraints.REMAINDER;
+            gb.setConstraints(goodNameTextField, gbc);
+            containerPanel.add(goodNameTextField);
+        }
 
+        gbc.gridwidth = 1;
         gb.setConstraints(goodAmountLabel, gbc);
         containerPanel.add(goodAmountLabel);
         gb.setConstraints(goodAmountTextField, gbc);
@@ -56,10 +70,10 @@ public class EntryOrExitPanel extends JPanel {
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gb.setConstraints(goodPriceTextField, gbc);
         containerPanel.add(goodPriceTextField);
+
         gbc.gridwidth = 1;
         gb.setConstraints(contactLabel, gbc);
         containerPanel.add(contactLabel);
-
         gb.setConstraints(contactTextField, gbc);
         containerPanel.add(contactTextField);
         gb.setConstraints(contactPhoneLabel, gbc);
@@ -67,6 +81,7 @@ public class EntryOrExitPanel extends JPanel {
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gb.setConstraints(contactPhoneTextField, gbc);
         containerPanel.add(contactPhoneTextField);
+
         gbc.insets = new Insets(30, 10, 40, 10);
         gb.setConstraints(button, gbc);
         containerPanel.add(button);
@@ -124,6 +139,16 @@ public class EntryOrExitPanel extends JPanel {
 
     public JTable getTable() {
         return table;
+    }
+
+    public boolean isNewGood(){
+        String isNewGood = (String) isNewGoodBox.getSelectedItem();
+        if(isNewGood.equals("是")){
+            return true;
+        } else{
+            return false;
+        }
+
     }
 
     public static void main(String[] args) {
