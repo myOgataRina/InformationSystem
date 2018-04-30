@@ -736,6 +736,7 @@ public class SalesmanUI extends OperationUI {
             orderAmount = Integer.valueOf(newOrderPanel.getGoodAmount());
         } catch (NumberFormatException e) {
             System.out.println("请输入正确的订单数量");
+            JOptionPane.showMessageDialog(null, "请输入正确的订单数量", "错误", JOptionPane.ERROR_MESSAGE);
         }
 
         Connection connection = SqlControler.getConnection();
@@ -746,10 +747,11 @@ public class SalesmanUI extends OperationUI {
         ResultSet resultSet = preparedStatement.executeQuery();
         if (!resultSet.next()) {
             System.out.println("该用户不存在，请确认用户名是否正确");
+            JOptionPane.showMessageDialog(null, "该用户不存在，请确认用户名是否正确", "错误", JOptionPane.ERROR_MESSAGE);
             return;
         }
         if (orderAmount > 0) {
-             connection = SqlControler.getConnection();
+            connection = SqlControler.getConnection();
             preparedStatement = connection.prepareStatement("" +
                     "SELECT * FROM good " +
                     "WHERE g_name=?");
@@ -760,6 +762,7 @@ public class SalesmanUI extends OperationUI {
                 goodAmount = resultSet.getInt(3);
             } else {
                 System.out.println("该商品不存在，请确认商品名称是否正确");
+                JOptionPane.showMessageDialog(null, "该商品不存在，请确认商品名称是否正确", "错误", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             if (orderAmount <= goodAmount) { // 0 < orderAmount <= goodAmount
@@ -773,6 +776,7 @@ public class SalesmanUI extends OperationUI {
                 preparedStatement.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
                 int i = preparedStatement.executeUpdate();
                 System.out.println("在m_order表插入了" + i + "条记录");
+                JOptionPane.showMessageDialog(null, "新建" + i + "条订单。", "新建订单成功", JOptionPane.INFORMATION_MESSAGE);
 
                 //更新good表库存
                 preparedStatement = connection.prepareStatement("" +
@@ -784,8 +788,9 @@ public class SalesmanUI extends OperationUI {
                 preparedStatement.setInt(3, goodID);
                 i = preparedStatement.executeUpdate();
                 System.out.println("在good表更新了" + i + "条记录");
-            } else{
+            } else {
                 System.out.println("商品库存不足");
+                JOptionPane.showMessageDialog(null, "商品库存不足", "错误", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -817,6 +822,7 @@ public class SalesmanUI extends OperationUI {
             e.printStackTrace();
             if (!this.confirmationPanel.getO_id().equals("")) {
                 System.out.println("请确认输入的订单编号格式是否正确");
+                JOptionPane.showMessageDialog(null, "请确认输入的订单编号格式是否正确", "错误", JOptionPane.ERROR_MESSAGE);
                 return;
             }
         }
@@ -920,6 +926,7 @@ public class SalesmanUI extends OperationUI {
         //输入为空则直接退出
         if (this.confirmationPanel.getO_id().equals("")) {
             System.out.println("请输入待确认的订单编号");
+            JOptionPane.showMessageDialog(null, "请输入待确认的订单编号", "警告", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -929,6 +936,7 @@ public class SalesmanUI extends OperationUI {
         } catch (NumberFormatException e) {
             e.printStackTrace();
             System.out.println("请输入正确的订单编号");
+            JOptionPane.showMessageDialog(null, "请输入正确的订单编号", "警告", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -941,6 +949,7 @@ public class SalesmanUI extends OperationUI {
         ResultSet resultSet = preparedStatement.executeQuery();
         if (!resultSet.next()) {
             System.out.println("无法查询到该订单号");
+            JOptionPane.showMessageDialog(null, "无法查询到该订单号", "警告", JOptionPane.WARNING_MESSAGE);
         } else {
             preparedStatement = connection.prepareStatement("" +
                     "UPDATE m_order " +
@@ -951,6 +960,7 @@ public class SalesmanUI extends OperationUI {
             preparedStatement.setInt(3, o_id);
             int i = preparedStatement.executeUpdate();
             System.out.println("确认" + i + "条订单");
+            JOptionPane.showMessageDialog(null, "确认" + i + "条订单", null, JOptionPane.INFORMATION_MESSAGE);
         }
     }
 

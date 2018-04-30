@@ -2,6 +2,7 @@ package com.util;
 
 import com.object.User;
 
+import javax.swing.*;
 import java.sql.*;
 
 public class SqlControler {
@@ -19,10 +20,12 @@ public class SqlControler {
             } catch (SQLException e) {
                 e.printStackTrace();
                 System.out.println("无法获取数据库连接");
+                JOptionPane.showMessageDialog(null, "无法获取数据库连接", "错误", JOptionPane.ERROR_MESSAGE);
                 return null;
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
                 System.out.println("无法获取数据库连接");
+                JOptionPane.showMessageDialog(null, "无法获取数据库连接", "错误", JOptionPane.ERROR_MESSAGE);
                 return null;
             }
             return connection;

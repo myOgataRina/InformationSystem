@@ -84,6 +84,7 @@ public class StoreKeeperUI extends OperationUI {
             e.printStackTrace();
             if (!this.shippingPanel.getO_id().equals("")) {
                 System.out.println("请确认输入的订单编号格式是否正确");
+                JOptionPane.showMessageDialog(null, "请确认输入的订单编号格式是否正确", "警告", JOptionPane.WARNING_MESSAGE);
                 return;
             }
         }
@@ -187,6 +188,7 @@ public class StoreKeeperUI extends OperationUI {
         //输入为空则直接退出
         if (this.shippingPanel.getO_id().equals("")) {
             System.out.println("请输入待确认的订单编号");
+            JOptionPane.showMessageDialog(null, "请输入待确认的订单编号", null, JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
@@ -196,6 +198,7 @@ public class StoreKeeperUI extends OperationUI {
         } catch (NumberFormatException e) {
             e.printStackTrace();
             System.out.println("请输入正确的订单编号");
+            JOptionPane.showMessageDialog(null, "请输入正确的订单编号", "警告", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
@@ -208,6 +211,7 @@ public class StoreKeeperUI extends OperationUI {
         ResultSet resultSet = preparedStatement.executeQuery();
         if (!resultSet.next()) {
             System.out.println("无法查询到该订单号");
+            JOptionPane.showMessageDialog(null, "无法查询到该订单号", "警告", JOptionPane.WARNING_MESSAGE);
         } else {
             preparedStatement = connection.prepareStatement("" +
                     "UPDATE m_order " +
@@ -218,6 +222,7 @@ public class StoreKeeperUI extends OperationUI {
             preparedStatement.setInt(3, o_id);
             int i = preparedStatement.executeUpdate();
             System.out.println("出仓" + i + "条订单");
+            JOptionPane.showMessageDialog(null, "出仓" + i + "条订单", "出仓成功", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
@@ -284,16 +289,19 @@ public class StoreKeeperUI extends OperationUI {
             String r_phone = entryPanel.getContactPhone();
             if (r_name.equals("")) {
                 System.out.println("联系人不能为空");
+                JOptionPane.showMessageDialog(null, "联系人不能为空", "警告", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             if (r_phone.equals("")) {
                 System.out.println("联系方式不能为空");
+                JOptionPane.showMessageDialog(null, "联系方式不能为空", "警告", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             try {
                 r_amount = Integer.valueOf(this.entryPanel.getGoodAmount());//入库数量
             } catch (NumberFormatException e) {
                 System.out.println("请输入正确的商品数量");
+                JOptionPane.showMessageDialog(null, "请输入正确的商品数量", "警告", JOptionPane.WARNING_MESSAGE);
                 e.printStackTrace();
                 return;
             }
@@ -301,6 +309,7 @@ public class StoreKeeperUI extends OperationUI {
                 price = Float.valueOf(entryPanel.getPrice());
             } catch (NumberFormatException e) {
                 System.out.println("请输入正确的商品价格");
+                JOptionPane.showMessageDialog(null, "请输入正确的商品价格", "警告", JOptionPane.WARNING_MESSAGE);
                 e.printStackTrace();
                 return;
             }
@@ -312,6 +321,7 @@ public class StoreKeeperUI extends OperationUI {
                 ResultSet resultSet = preparedStatement.executeQuery();
                 if (resultSet.next()) {
                     System.out.println("商品已存在，请选择旧商品进行入库");
+                    JOptionPane.showMessageDialog(null, "商品已存在，请选择旧商品进行入库", "警告", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
             } catch (SQLException e) {
@@ -338,6 +348,7 @@ public class StoreKeeperUI extends OperationUI {
                     System.out.println("g_id = " + g_id);
                 } else {
                     System.out.println("新商品查询商品编号失败");
+                    JOptionPane.showMessageDialog(null, "新商品查询商品编号失败", "警告", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
             } catch (SQLException e) {
@@ -360,10 +371,12 @@ public class StoreKeeperUI extends OperationUI {
             String r_phone = entryPanel.getContactPhone();
             if (r_name.equals("")) {
                 System.out.println("联系人不能为空");
+                JOptionPane.showMessageDialog(null, "联系人不能为空", "警告", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             if (r_phone.equals("")) {
                 System.out.println("联系方式不能为空");
+                JOptionPane.showMessageDialog(null, "联系方式不能为空", "警告", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             try {
@@ -382,6 +395,7 @@ public class StoreKeeperUI extends OperationUI {
                             price = Float.valueOf(entryPanel.getPrice());
                             SqlControler.Storehouse.entry(g_id, r_amount, price, r_name, r_phone, Client.u_id);
                             System.out.println("成功添加一条入库记录");
+                            JOptionPane.showMessageDialog(null, "成功添加一条入库记录", "入库成功", JOptionPane.INFORMATION_MESSAGE);
 
                             amount = amount + r_amount;
                             System.out.println("g_id = " + g_id + " amount = " + amount);
@@ -396,13 +410,16 @@ public class StoreKeeperUI extends OperationUI {
 
                         } catch (NumberFormatException e1) {
                             System.out.println("价格输入错误，请输入正确的数字");
+                            JOptionPane.showMessageDialog(null, "价格输入错误，请输入正确的数字", "警告", JOptionPane.WARNING_MESSAGE);
                         }
                     } catch (NumberFormatException ex) {
                         ex.printStackTrace();
                         System.out.println("商品数额输入错误，请输出正确的数字");
+                        JOptionPane.showMessageDialog(null, "商品数额输入错误，请输出正确的数字", "警告", JOptionPane.WARNING_MESSAGE);
                     }
                 } else {
                     System.out.println("查询不到该商品");
+                    JOptionPane.showMessageDialog(null, "查询不到该商品", "警告", JOptionPane.WARNING_MESSAGE);
                 }
             } catch (SQLException e2) {
                 e2.printStackTrace();
@@ -420,10 +437,12 @@ public class StoreKeeperUI extends OperationUI {
         String r_phone = exitPanel.getContactPhone();
         if (r_name.equals("")) {
             System.out.println("联系人不能为空");
+            JOptionPane.showMessageDialog(null, "查询不到该商品", "警告", JOptionPane.WARNING_MESSAGE);
             return;
         }
         if (r_phone.equals("")) {
             System.out.println("联系方式不能为空");
+            JOptionPane.showMessageDialog(null, "查询不到该商品", "警告", JOptionPane.WARNING_MESSAGE);
             return;
         }
         try {
@@ -440,12 +459,14 @@ public class StoreKeeperUI extends OperationUI {
                     r_amount = Integer.valueOf(exitPanel.getGoodAmount());
                     if (amount < r_amount) {
                         System.out.println("商品库存不足");
+                        JOptionPane.showMessageDialog(null, "商品库存不足", "警告", JOptionPane.WARNING_MESSAGE);
                         return;
                     }
                     try {
                         price = Float.valueOf(exitPanel.getPrice());
                         SqlControler.Storehouse.exit(g_id, r_amount, price, r_name, r_phone, Client.u_id);
                         System.out.println("成功添加一条出库记录");
+                        JOptionPane.showMessageDialog(null, "成功添加一条出库记录", "出库成功", JOptionPane.INFORMATION_MESSAGE);
 
                         amount = amount - r_amount;
                         System.out.println("g_id = " + g_id + " amount = " + amount);
@@ -460,13 +481,16 @@ public class StoreKeeperUI extends OperationUI {
 
                     } catch (NumberFormatException e1) {
                         System.out.println("价格输入错误，请输入正确的数字");
+                        JOptionPane.showMessageDialog(null, "价格输入错误，请输入正确的数字", "警告", JOptionPane.WARNING_MESSAGE);
                     }
                 } catch (NumberFormatException ex) {
                     ex.printStackTrace();
                     System.out.println("商品数额输入错误，请输出正确的数字");
+                    JOptionPane.showMessageDialog(null, "商品数额输入错误，请输出正确的数字", "警告", JOptionPane.WARNING_MESSAGE);
                 }
             } else {
                 System.out.println("查询不到该商品");
+                JOptionPane.showMessageDialog(null, "查询不到该商品", "警告", JOptionPane.WARNING_MESSAGE);
             }
         } catch (SQLException e2) {
             e2.printStackTrace();

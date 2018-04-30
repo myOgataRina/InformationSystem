@@ -57,10 +57,11 @@ public class ChangeInformationPanel extends JPanel {
     }
 
     //给按键绑定功能
-    public void setChangePasswordButtonListener(ActionListener listener ) {
+    public void setChangePasswordButtonListener(ActionListener listener) {
         changePasswordButton.addActionListener(listener);
     }
-    public void setChangePasswordButtonListener( ) {
+
+    public void setChangePasswordButtonListener() {
         changePasswordButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -68,9 +69,11 @@ public class ChangeInformationPanel extends JPanel {
             }
         });
     }
+
     public void setChangeInformationButtonListener(ActionListener listener) {
         changeInformationButton.addActionListener(listener);
     }
+
     public void setChangeInformationButtonListener() {
         changeInformationButton.addActionListener(new ActionListener() {
             @Override
@@ -88,8 +91,10 @@ public class ChangeInformationPanel extends JPanel {
                     int i = preparedStatement.executeUpdate();
                     if (i == 0) {
                         System.out.println("资料更新失败");
+                        JOptionPane.showMessageDialog(null, "资料更新失败", "错误", JOptionPane.ERROR_MESSAGE);
                     } else {
                         System.out.println("更新" + i + "条记录");
+                        JOptionPane.showMessageDialog(null, "更新" + i + "条记录", "更新成功", JOptionPane.INFORMATION_MESSAGE);
                     }
                 } catch (SQLException e1) {
                     e1.printStackTrace();

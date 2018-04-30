@@ -65,6 +65,7 @@ public class PasswordChangeUI {
                     PasswordChangeUI.changePassword(u_id, oldPassword, newPassword);
                 } else {
                     System.out.println("两次输入的新密码不一致");
+                    JOptionPane.showMessageDialog(null, "两次输入的新密码不一致", "警告", JOptionPane.WARNING_MESSAGE);
                 }
             }
         });
@@ -87,8 +88,10 @@ public class PasswordChangeUI {
             int i = preparedStatement.executeUpdate();
             if(i==0){
                 System.out.println("旧密码错误，重置密码失败，请重新再试");
+                JOptionPane.showMessageDialog(null, "旧密码错误，重置密码失败，请重新再试", "错误", JOptionPane.ERROR_MESSAGE);
             }
             System.out.println("更新了" + i + "条记录");
+            JOptionPane.showMessageDialog(null, "更新了" + i + "条记录", "更新成功", JOptionPane.INFORMATION_MESSAGE);
         } catch (SQLException e) {
             e.printStackTrace();
         }
