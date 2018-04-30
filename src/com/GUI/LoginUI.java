@@ -18,22 +18,19 @@ import com.main.Client;
 import com.util.*;
 
 public class LoginUI {
-//    final private String DBUSER = "root";
-//    final private String DBPWD = "root";
-
     private JFrame loginFrame = new JFrame("登陆界面");
     private ImageIcon picture = new ImageIcon("Resource/login.jpg");
     private GridBagConstraints gbc = new GridBagConstraints();
     private GridBagLayout gb = new GridBagLayout();
     private JPanel loginArea = new JPanel(gb);
     private JPanel accountArea = new JPanel();
-    private JLabel accountLabel = new JLabel("账  号");
+    private JLabel accountLabel = new JLabel("账  号：");
     private JTextField accountTF = new JTextField(20);
     private JPanel passwordArea = new JPanel();
-    private JLabel passwordLabel = new JLabel("密  码");
+    private JLabel passwordLabel = new JLabel("密  码：");
     private JPasswordField passwordTF = new JPasswordField(20);
     private JPanel typeArea = new JPanel();
-    private JLabel typeLabel = new JLabel("类  型");
+    private JLabel typeLabel = new JLabel("类  型：");
     final private String[] TYPE_OF_USER = new String[]{"客户", "部门经理", "业务员", "仓库管理员", "配送员"};
     private JComboBox<String> type = new JComboBox<>(TYPE_OF_USER);
     private String selectedType = "客户";
@@ -198,7 +195,9 @@ public class LoginUI {
                 } else {
                     //登录失败
                     System.out.println("登录失败，账户名或密码错误，请重新再试。");
+                    JOptionPane.showMessageDialog(null,"登录失败，账户名或密码错误，请重新再试。","登陆失败",JOptionPane.ERROR_MESSAGE);
                 }
+
 
             } catch (SQLException e1) {
                 e1.printStackTrace();
@@ -226,18 +225,22 @@ public class LoginUI {
                     if (preparedStatement.executeUpdate() == 1) {
                         //弹出提示
                         System.out.println("用户添加成功");
+                        JOptionPane.showMessageDialog(null, "用户添加成功", "注册", JOptionPane.INFORMATION_MESSAGE);
                     } else {
                         System.out.println("用户添加失败");
+                        JOptionPane.showMessageDialog(null, "用户添加失败", "注册", JOptionPane.WARNING_MESSAGE);
                     }
                 } catch (SQLException e1) {
                     //增加unique约束时，重复注册用户名会报错。
                     e1.printStackTrace();
                     System.out.println(e1.getMessage());
+                    JOptionPane.showMessageDialog(null, e1.getMessage(), "注册", JOptionPane.WARNING_MESSAGE);
                 }
 
             } else {
                 //弹出窗口显示非客户不能注册
                 System.out.println("注册权限不足，非客户用户请与总部联系。");
+                JOptionPane.showMessageDialog(null, "注册权限不足，非客户用户请与总部联系。", "注册", JOptionPane.WARNING_MESSAGE);
             }
         }
     }

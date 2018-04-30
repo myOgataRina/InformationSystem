@@ -103,26 +103,30 @@ public class StoreKeeperUI extends OperationUI {
         preparedStatement = connection.prepareStatement("" +
                 "SELECT o_id , u_id ,  m_order.g_id , g_name , m_order.amount , status , confirm_time " +
                 "FROM good , m_order " +
-                "WHERE status = '订单已确认' AND m_order.g_id=good.g_id");
+                "WHERE status = '订单已确认' AND m_order.g_id=good.g_id " +
+                "ORDER BY o_id");
         if (status == 1) {
             preparedStatement = connection.prepareStatement("" +
                     "SELECT o_id , u_id ,  m_order.g_id , g_name , m_order.amount , status , confirm_time " +
                     "FROM good , m_order " +
-                    "WHERE status = '订单已确认' AND m_order.g_id=good.g_id AND g_name=?");
+                    "WHERE status = '订单已确认' AND m_order.g_id=good.g_id AND g_name=? " +
+                    "ORDER BY o_id");
             preparedStatement.setString(1, goodName);
         }
         if (status == 2) {
             preparedStatement = connection.prepareStatement("" +
                     "SELECT o_id ,  u_id , m_order.g_id , g_name , m_order.amount , status , confirm_time " +
                     "FROM good , m_order " +
-                    "WHERE status = '订单已确认' AND m_order.g_id=good.g_id AND u_id=?");
+                    "WHERE status = '订单已确认' AND m_order.g_id=good.g_id AND u_id=? " +
+                    "ORDER BY o_id");
             preparedStatement.setString(1, u_id);
         }
         if (status == 3) {
             preparedStatement = connection.prepareStatement("" +
                     "SELECT o_id , u_id ,  m_order.g_id , g_name , m_order.amount , status , confirm_time " +
                     "FROM good , m_order " +
-                    "WHERE status = '订单已确认' AND m_order.g_id=good.g_id AND g_name=? AND u_id=?");
+                    "WHERE status = '订单已确认' AND m_order.g_id=good.g_id AND g_name=? AND u_id=? " +
+                    "ORDER BY o_id");
             preparedStatement.setString(1, goodName);
             preparedStatement.setString(2, u_id);
         }
@@ -130,14 +134,16 @@ public class StoreKeeperUI extends OperationUI {
             preparedStatement = connection.prepareStatement("" +
                     "SELECT o_id , u_id ,  m_order.g_id , g_name , m_order.amount , status , confirm_time " +
                     "FROM good , m_order " +
-                    "WHERE status = '订单已确认' AND m_order.g_id=good.g_id AND o_id=?");
+                    "WHERE status = '订单已确认' AND m_order.g_id=good.g_id AND o_id=? " +
+                    "ORDER BY o_id");
             preparedStatement.setInt(1, o_id);
         }
         if (status == 5) {
             preparedStatement = connection.prepareStatement("" +
                     "SELECT o_id ,  u_id , m_order.g_id , g_name , m_order.amount , status , confirm_time " +
                     "FROM good , m_order " +
-                    "WHERE status = '订单已确认' AND m_order.g_id=good.g_id AND o_id=? AND g_name=?");
+                    "WHERE status = '订单已确认' AND m_order.g_id=good.g_id AND o_id=? AND g_name=? " +
+                    "ORDER BY o_id");
             preparedStatement.setInt(1, o_id);
             preparedStatement.setString(2, goodName);
         }
@@ -145,7 +151,8 @@ public class StoreKeeperUI extends OperationUI {
             preparedStatement = connection.prepareStatement("" +
                     "SELECT o_id , u_id , m_order.g_id , g_name , m_order.amount , status , confirm_time " +
                     "FROM good , m_order " +
-                    "WHERE status = '订单已确认' AND m_order.g_id=good.g_id AND o_id=? AND u_id=?");
+                    "WHERE status = '订单已确认' AND m_order.g_id=good.g_id AND o_id=? AND u_id=? " +
+                    "ORDER BY o_id");
             preparedStatement.setInt(1, o_id);
             preparedStatement.setString(2, u_id);
         }
@@ -153,7 +160,8 @@ public class StoreKeeperUI extends OperationUI {
             preparedStatement = connection.prepareStatement("" +
                     "SELECT o_id , u_id , m_order.g_id , g_name , m_order.amount , status , confirm_time " +
                     "FROM good , m_order " +
-                    "WHERE status = '订单已确认' AND m_order.g_id=good.g_id AND o_id=? AND u_id=? AND g_name=?");
+                    "WHERE status = '订单已确认' AND m_order.g_id=good.g_id AND o_id=? AND u_id=? AND g_name=? " +
+                    "ORDER BY o_id");
             preparedStatement.setInt(1, o_id);
             preparedStatement.setString(2, u_id);
             preparedStatement.setString(3, goodName);
@@ -203,7 +211,7 @@ public class StoreKeeperUI extends OperationUI {
         } else {
             preparedStatement = connection.prepareStatement("" +
                     "UPDATE m_order " +
-                    "set status=? , ship_time=? " +
+                    "set status=? , exit_time=? " +
                     "WHERE o_id=?");
             preparedStatement.setString(1, "订单已出仓");
             preparedStatement.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
@@ -274,6 +282,14 @@ public class StoreKeeperUI extends OperationUI {
             float price = 0;
             String r_name = entryPanel.getContact();
             String r_phone = entryPanel.getContactPhone();
+            if (r_name.equals("")) {
+                System.out.println("联系人不能为空");
+                return;
+            }
+            if (r_phone.equals("")) {
+                System.out.println("联系方式不能为空");
+                return;
+            }
             try {
                 r_amount = Integer.valueOf(this.entryPanel.getGoodAmount());//入库数量
             } catch (NumberFormatException e) {
@@ -281,9 +297,9 @@ public class StoreKeeperUI extends OperationUI {
                 e.printStackTrace();
                 return;
             }
-            try{
+            try {
                 price = Float.valueOf(entryPanel.getPrice());
-            }catch (NumberFormatException e){
+            } catch (NumberFormatException e) {
                 System.out.println("请输入正确的商品价格");
                 e.printStackTrace();
                 return;
@@ -320,7 +336,7 @@ public class StoreKeeperUI extends OperationUI {
                 if (resultSet.next()) {
                     g_id = resultSet.getInt(1);
                     System.out.println("g_id = " + g_id);
-                } else{
+                } else {
                     System.out.println("新商品查询商品编号失败");
                     return;
                 }
@@ -328,7 +344,7 @@ public class StoreKeeperUI extends OperationUI {
                 e.printStackTrace();
             }
             try {
-                SqlControler.Storehouse.entry(g_id,r_amount,price,r_name,r_phone, Client.u_id);
+                SqlControler.Storehouse.entry(g_id, r_amount, price, r_name, r_phone, Client.u_id);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -342,6 +358,14 @@ public class StoreKeeperUI extends OperationUI {
             String goodName = entryPanel.getGoodName();
             String r_name = entryPanel.getContact();
             String r_phone = entryPanel.getContactPhone();
+            if (r_name.equals("")) {
+                System.out.println("联系人不能为空");
+                return;
+            }
+            if (r_phone.equals("")) {
+                System.out.println("联系方式不能为空");
+                return;
+            }
             try {
                 Connection connection = SqlControler.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement("" +
@@ -394,6 +418,14 @@ public class StoreKeeperUI extends OperationUI {
         String goodName = exitPanel.getGoodName();
         String r_name = exitPanel.getContact();
         String r_phone = exitPanel.getContactPhone();
+        if (r_name.equals("")) {
+            System.out.println("联系人不能为空");
+            return;
+        }
+        if (r_phone.equals("")) {
+            System.out.println("联系方式不能为空");
+            return;
+        }
         try {
             Connection connection = SqlControler.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement("" +

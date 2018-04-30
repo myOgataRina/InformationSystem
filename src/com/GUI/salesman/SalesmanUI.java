@@ -20,6 +20,7 @@ public class SalesmanUI extends OperationUI {
     private JFrame frame = new JFrame("业务员界面");
 
     public SalesmanUI() {
+        //查询订单界面功能实现
         processingOrderPanel.setButtonListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -40,6 +41,50 @@ public class SalesmanUI extends OperationUI {
                 }
             }
         });
+
+        //新建订单功能实现
+        newOrderPanel.setButtonListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    addNewOrder();
+                    refreshGoodList();
+                    refreshProcessingOrder();
+                    refreshSubmittedOrderList();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+
+            }
+        });
+
+        //确认订单功能实现
+        confirmationPanel.setSearchButtonListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    searchSubmittedOrder();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+
+        confirmationPanel.setConfirmButtonListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    confirmSubmittedOrder();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+
+
+        //个人信息修改功能实现
+        changeInformationPanel.setChangeInformationButtonListener();
+        changeInformationPanel.setChangePasswordButtonListener();
 
 
         JTabbedPane tabbedPane = new JTabbedPane();
@@ -679,8 +724,91 @@ public class SalesmanUI extends OperationUI {
         }
     }
 
+    //新建订单功能
+    //添加新订单，需要更改库存，添加订单
+    private void addNewOrder() throws SQLException {
+        String userID = newOrderPanel.getUserID();
+        String goodName = newOrderPanel.getGoodName();
+        int orderAmount = 0;
+        int goodID = 0;
+        int goodAmount = -1;
+        try {
+            orderAmount = Integer.valueOf(newOrderPanel.getGoodAmount());
+        } catch (NumberFormatException e) {
+            System.out.println("请输入正确的订单数量");
+        }
+
+        Connection connection = SqlControler.getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement("" +
+                "SELECT * FROM user " +
+                "WHERE u_id=?");
+        preparedStatement.setString(1, userID);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        if (!resultSet.next()) {
+            System.out.println("该用户不存在，请确认用户名是否正确");
+            return;
+        }
+        if (orderAmount > 0) {
+             connection = SqlControler.getConnection();
+            preparedStatement = connection.prepareStatement("" +
+                    "SELECT * FROM good " +
+                    "WHERE g_name=?");
+            preparedStatement.setString(1, goodName);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                goodID = resultSet.getInt(1);
+                goodAmount = resultSet.getInt(3);
+            } else {
+                System.out.println("该商品不存在，请确认商品名称是否正确");
+                return;
+            }
+            if (orderAmount <= goodAmount) { // 0 < orderAmount <= goodAmount
+                //在m_order表新建一条记录
+                preparedStatement = connection.prepareStatement("" +
+                        "INSERT INTO m_order( g_id , amount , u_id , submit_time , status ) " +
+                        "VALUES (?,?,?,?,'订单已提交')");
+                preparedStatement.setInt(1, goodID);
+                preparedStatement.setInt(2, orderAmount);
+                preparedStatement.setString(3, userID);
+                preparedStatement.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+                int i = preparedStatement.executeUpdate();
+                System.out.println("在m_order表插入了" + i + "条记录");
+
+                //更新good表库存
+                preparedStatement = connection.prepareStatement("" +
+                        "UPDATE good " +
+                        "SET amount=? " +
+                        "WHERE g_name=? AND g_id=?");
+                preparedStatement.setInt(1, goodAmount - orderAmount);
+                preparedStatement.setString(2, goodName);
+                preparedStatement.setInt(3, goodID);
+                i = preparedStatement.executeUpdate();
+                System.out.println("在good表更新了" + i + "条记录");
+            } else{
+                System.out.println("商品库存不足");
+            }
+        }
+    }
+
+    //刷新新建订单的商品列表
+    private void refreshGoodList() throws SQLException {
+        Connection connection = SqlControler.getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement("" +
+                "SELECT * FROM good " +
+                "ORDER BY g_id");
+        ResultSet resultSet = preparedStatement.executeQuery();
+        ResultSetTableModel resultSetTableModel = new ResultSetTableModel(resultSet);
+        JTable table = this.newOrderPanel.getTable();
+        table.setModel(resultSetTableModel);
+        resultSetTableModel.fireTableStructureChanged();
+        resultSetTableModel.fireTableDataChanged();
+        table.getColumnModel().getColumn(0).setHeaderValue("商品编号");
+        table.getColumnModel().getColumn(1).setHeaderValue("商品名称");
+        table.getColumnModel().getColumn(2).setHeaderValue("商品库存");
+    }
+
     //搜索已经提交的订单
-    public void searchSubmittedOrder() throws SQLException {
+    private void searchSubmittedOrder() throws SQLException {
         int status = 0;
         int o_id = 0;
         try {
@@ -708,26 +836,30 @@ public class SalesmanUI extends OperationUI {
         preparedStatement = connection.prepareStatement("" +
                 "SELECT o_id , u_id ,  m_order.g_id , g_name , m_order.amount , status , submit_time " +
                 "FROM good , m_order " +
-                "WHERE status = '订单已提交' AND m_order.g_id=good.g_id");
+                "WHERE status = '订单已提交' AND m_order.g_id=good.g_id " +
+                "ORDER BY o_id");
         if (status == 1) {
             preparedStatement = connection.prepareStatement("" +
                     "SELECT o_id , u_id ,  m_order.g_id , g_name , m_order.amount , status , submit_time " +
                     "FROM good , m_order " +
-                    "WHERE status = '订单已提交' AND m_order.g_id=good.g_id AND g_name=?");
+                    "WHERE status = '订单已提交' AND m_order.g_id=good.g_id AND g_name=? " +
+                    "ORDER BY o_id");
             preparedStatement.setString(1, goodName);
         }
         if (status == 2) {
             preparedStatement = connection.prepareStatement("" +
                     "SELECT o_id ,  u_id , m_order.g_id , g_name , m_order.amount , status , submit_time " +
                     "FROM good , m_order " +
-                    "WHERE status = '订单已提交' AND m_order.g_id=good.g_id AND u_id=?");
+                    "WHERE status = '订单已提交' AND m_order.g_id=good.g_id AND u_id=? " +
+                    "ORDER BY o_id");
             preparedStatement.setString(1, u_id);
         }
         if (status == 3) {
             preparedStatement = connection.prepareStatement("" +
                     "SELECT o_id , u_id ,  m_order.g_id , g_name , m_order.amount , status , submit_time " +
                     "FROM good , m_order " +
-                    "WHERE status = '订单已提交' AND m_order.g_id=good.g_id AND g_name=? AND u_id=?");
+                    "WHERE status = '订单已提交' AND m_order.g_id=good.g_id AND g_name=? AND u_id=? " +
+                    "ORDER BY o_id");
             preparedStatement.setString(1, goodName);
             preparedStatement.setString(2, u_id);
         }
@@ -735,14 +867,16 @@ public class SalesmanUI extends OperationUI {
             preparedStatement = connection.prepareStatement("" +
                     "SELECT o_id , u_id ,  m_order.g_id , g_name , m_order.amount , status , submit_time " +
                     "FROM good , m_order " +
-                    "WHERE status = '订单已提交' AND m_order.g_id=good.g_id AND o_id=?");
+                    "WHERE status = '订单已提交' AND m_order.g_id=good.g_id AND o_id=? " +
+                    "ORDER BY o_id");
             preparedStatement.setInt(1, o_id);
         }
         if (status == 5) {
             preparedStatement = connection.prepareStatement("" +
                     "SELECT o_id ,  u_id , m_order.g_id , g_name , m_order.amount , status , submit_time " +
                     "FROM good , m_order " +
-                    "WHERE status = '订单已提交' AND m_order.g_id=good.g_id AND o_id=? AND g_name=?");
+                    "WHERE status = '订单已提交' AND m_order.g_id=good.g_id AND o_id=? AND g_name=? " +
+                    "ORDER BY o_id");
             preparedStatement.setInt(1, o_id);
             preparedStatement.setString(2, goodName);
         }
@@ -750,7 +884,8 @@ public class SalesmanUI extends OperationUI {
             preparedStatement = connection.prepareStatement("" +
                     "SELECT o_id , u_id , m_order.g_id , g_name , m_order.amount , status , submit_time " +
                     "FROM good , m_order " +
-                    "WHERE status = '订单已提交' AND m_order.g_id=good.g_id AND o_id=? AND u_id=?");
+                    "WHERE status = '订单已提交' AND m_order.g_id=good.g_id AND o_id=? AND u_id=? " +
+                    "ORDER BY o_id");
             preparedStatement.setInt(1, o_id);
             preparedStatement.setString(2, u_id);
         }
@@ -758,7 +893,8 @@ public class SalesmanUI extends OperationUI {
             preparedStatement = connection.prepareStatement("" +
                     "SELECT o_id , u_id , m_order.g_id , g_name , m_order.amount , status , submit_time " +
                     "FROM good , m_order " +
-                    "WHERE status = '订单已提交' AND m_order.g_id=good.g_id AND o_id=? AND u_id=? AND g_name=?");
+                    "WHERE status = '订单已提交' AND m_order.g_id=good.g_id AND o_id=? AND u_id=? AND g_name=? " +
+                    "ORDER BY o_id");
             preparedStatement.setInt(1, o_id);
             preparedStatement.setString(2, u_id);
             preparedStatement.setString(3, goodName);
@@ -779,7 +915,7 @@ public class SalesmanUI extends OperationUI {
         jTable.getColumnModel().getColumn(6).setHeaderValue("提交时间");
     }
 
-    public void confirmSubmittedOrder() throws SQLException {
+    private void confirmSubmittedOrder() throws SQLException {
         int o_id = -1;
         //输入为空则直接退出
         if (this.confirmationPanel.getO_id().equals("")) {
@@ -809,7 +945,7 @@ public class SalesmanUI extends OperationUI {
             preparedStatement = connection.prepareStatement("" +
                     "UPDATE m_order " +
                     "set status=? , confirm_time=? " +
-                    "WHERE o_id=?");
+                    "WHERE o_id=? AND status='订单已提交'");
             preparedStatement.setString(1, "订单已确认");
             preparedStatement.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
             preparedStatement.setInt(3, o_id);
@@ -818,14 +954,15 @@ public class SalesmanUI extends OperationUI {
         }
     }
 
-    public void refreshSubmittedOrderList() {
+    private void refreshSubmittedOrderList() {
         Connection connection = SqlControler.getConnection();
         PreparedStatement preparedStatement;
         try {
             preparedStatement = connection.prepareStatement("" +
                     "SELECT o_id , u_id ,  m_order.g_id , g_name , m_order.amount , status , submit_time " +
                     "FROM good , m_order " +
-                    "WHERE status = '订单已提交' AND m_order.g_id=good.g_id");
+                    "WHERE status = '订单已提交' AND m_order.g_id=good.g_id " +
+                    "ORDER BY o_id");
             ResultSet resultSet = preparedStatement.executeQuery();
             ResultSetTableModel resultSetTableModel = new ResultSetTableModel(resultSet);
             JTable jTable = this.confirmationPanel.getTable();

@@ -18,8 +18,8 @@ public class ProcessingOrderPanel extends JPanel {
     private JTable table = new JTable();
 
     public ProcessingOrderPanel(){
-        JLabel userIDLabel = new JLabel("订单收货人:");
-        JLabel searchLabel = new JLabel("订单商品编号或商品名称:");
+        JLabel userIDLabel = new JLabel("订单收货人：");
+        JLabel searchLabel = new JLabel("订单商品编号或商品名称：");
 
         GridBagLayout gb = new GridBagLayout();
         GridBagConstraints gbc = new GridBagConstraints();

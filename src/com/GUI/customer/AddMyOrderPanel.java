@@ -21,8 +21,8 @@ public class AddMyOrderPanel extends JPanel {
         GridBagLayout gb = new GridBagLayout();
         GridBagConstraints gbc = new GridBagConstraints();
         JPanel containerPanel = new JPanel(gb);
-        JLabel goodNameLabel = new JLabel("订购商品名称");
-        JLabel goodAmountLabel = new JLabel("订购商品数量");
+        JLabel goodNameLabel = new JLabel("订购商品名称：");
+        JLabel goodAmountLabel = new JLabel("订购商品数量：");
         gbc.insets = new Insets(40, 0, 0, 0);
         gbc.gridwidth = 1;
         gb.setConstraints(goodNameLabel, gbc);

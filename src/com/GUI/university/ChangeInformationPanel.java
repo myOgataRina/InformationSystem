@@ -15,8 +15,8 @@ import java.sql.SQLException;
 public class ChangeInformationPanel extends JPanel {
     private JLabel u_idLabel = new JLabel("目前登陆的用户：" + Client.u_id);
     ;
-    private JLabel phoneLabel = new JLabel("电话");
-    private JLabel addressLabel = new JLabel("地址");
+    private JLabel phoneLabel = new JLabel("电话：");
+    private JLabel addressLabel = new JLabel("地址：");
     private JTextField phoneTextField = new JTextField(20);
     private JTextField addressTextField = new JTextField(20);
     private JButton changePasswordButton = new JButton("更改密码");
