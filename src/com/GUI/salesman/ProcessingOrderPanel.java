@@ -47,7 +47,7 @@ public class ProcessingOrderPanel extends JPanel {
         Connection connection = SqlControler.getConnection();
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("" +
-                    "SELECT o_id , m_order.g_id , g_name , m_order.amount , u_id , submit_time , ship_time , receipt_time , status " +
+                    "SELECT o_id , m_order.g_id , g_name , m_order.amount , u_id , submit_time , confirm_time , ship_time , receipt_time , status " +
                     "FROM m_order , good " +
                     "WHERE m_order.g_id=good.g_id " +
                     "ORDER BY o_id");
@@ -61,8 +61,9 @@ public class ProcessingOrderPanel extends JPanel {
             table.getColumnModel().getColumn(4).setHeaderValue("订单用户");
             table.getColumnModel().getColumn(5).setHeaderValue("提交时间");
             table.getColumnModel().getColumn(6).setHeaderValue("确认时间");
-            table.getColumnModel().getColumn(7).setHeaderValue("收货时间");
-            table.getColumnModel().getColumn(8).setHeaderValue("订单状态");
+            table.getColumnModel().getColumn(7).setHeaderValue("出仓时间");
+            table.getColumnModel().getColumn(8).setHeaderValue("收货时间");
+            table.getColumnModel().getColumn(9).setHeaderValue("订单状态");
         } catch (SQLException e) {
             e.printStackTrace();
         }

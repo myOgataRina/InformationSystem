@@ -15,6 +15,7 @@ public class StoreKeeperUI extends OperationUI {
     JFrame frame = new JFrame("仓库管理员界面");
     JTabbedPane tabbedPane = new JTabbedPane();
 
+    StoreEntryOrExitListPanel storeEntryOrExitListPanel = new StoreEntryOrExitListPanel();
     EntryOrExitPanel entryPanel = new EntryOrExitPanel(true);
     EntryOrExitPanel exitPanel = new EntryOrExitPanel(false);
     ShippingPanel shippingPanel = new ShippingPanel();
@@ -66,6 +67,7 @@ public class StoreKeeperUI extends OperationUI {
         changeInformationPanel.setChangeInformationButtonListener();
         changeInformationPanel.setChangePasswordButtonListener();
 
+        tabbedPane.add("出入库查询", storeEntryOrExitListPanel);
         tabbedPane.add("新建入库记录", entryPanel);
         tabbedPane.add("新建出库记录", exitPanel);
         tabbedPane.add("订单出仓", shippingPanel);
@@ -287,15 +289,8 @@ public class StoreKeeperUI extends OperationUI {
             float price = 0;
             String r_name = entryPanel.getContact();
             String r_phone = entryPanel.getContactPhone();
-            if (r_name.equals("")) {
-                System.out.println("联系人不能为空");
-                JOptionPane.showMessageDialog(null, "联系人不能为空", "警告", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            if (r_phone.equals("")) {
-                System.out.println("联系方式不能为空");
-                JOptionPane.showMessageDialog(null, "联系方式不能为空", "警告", JOptionPane.WARNING_MESSAGE);
-                return;
+            if (goodName.equals("")) {
+                JOptionPane.showMessageDialog(null, "请输入商品名称", "警告", JOptionPane.WARNING_MESSAGE);
             }
             try {
                 r_amount = Integer.valueOf(this.entryPanel.getGoodAmount());//入库数量
@@ -305,12 +300,28 @@ public class StoreKeeperUI extends OperationUI {
                 e.printStackTrace();
                 return;
             }
+            if (r_amount <= 0) {
+                JOptionPane.showMessageDialog(null, "请输入正确的商品数量", "警告", JOptionPane.WARNING_MESSAGE);
+            }
             try {
                 price = Float.valueOf(entryPanel.getPrice());
             } catch (NumberFormatException e) {
                 System.out.println("请输入正确的商品价格");
                 JOptionPane.showMessageDialog(null, "请输入正确的商品价格", "警告", JOptionPane.WARNING_MESSAGE);
                 e.printStackTrace();
+                return;
+            }
+            if (price < 0) {
+                JOptionPane.showMessageDialog(null, "请输入正确的商品价格", "警告", JOptionPane.WARNING_MESSAGE);
+            }
+            if (r_name.equals("")) {
+                System.out.println("联系人不能为空");
+                JOptionPane.showMessageDialog(null, "联系人不能为空", "警告", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            if (r_phone.equals("")) {
+                System.out.println("联系方式不能为空");
+                JOptionPane.showMessageDialog(null, "联系方式不能为空", "警告", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             Connection connection = SqlControler.getConnection();
@@ -391,8 +402,16 @@ public class StoreKeeperUI extends OperationUI {
                     amount = resultSet.getInt(3);
                     try {
                         r_amount = Integer.valueOf(entryPanel.getGoodAmount());
+                        if (r_amount <= 0) {
+                            JOptionPane.showMessageDialog(null, "商品数额输入错误，请输出正确的数字", "警告", JOptionPane.WARNING_MESSAGE);
+                            return;
+                        }
                         try {
                             price = Float.valueOf(entryPanel.getPrice());
+                            if (price < 0) {
+                                JOptionPane.showMessageDialog(null, "价格输入错误，请输入正确的数字", "警告", JOptionPane.WARNING_MESSAGE);
+                                return;
+                            }
                             SqlControler.Storehouse.entry(g_id, r_amount, price, r_name, r_phone, Client.u_id);
                             System.out.println("成功添加一条入库记录");
                             JOptionPane.showMessageDialog(null, "成功添加一条入库记录", "入库成功", JOptionPane.INFORMATION_MESSAGE);

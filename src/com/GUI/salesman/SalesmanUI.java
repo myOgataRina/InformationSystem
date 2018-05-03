@@ -609,7 +609,7 @@ public class SalesmanUI extends OperationUI {
     private void refreshProcessingOrder() throws SQLException {
         Connection connection = SqlControler.getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement("" +
-                "SELECT o_id , m_order.g_id , g_name , m_order.amount , u_id , submit_time , ship_time , receipt_time , status " +
+                "SELECT o_id , m_order.g_id , g_name , m_order.amount , u_id , submit_time , confirm_time , ship_time , receipt_time , status " +
                 "FROM m_order , good " +
                 "WHERE m_order.g_id=good.g_id " +
                 "ORDER BY o_id");
@@ -626,8 +626,9 @@ public class SalesmanUI extends OperationUI {
         table.getColumnModel().getColumn(4).setHeaderValue("订单用户");
         table.getColumnModel().getColumn(5).setHeaderValue("提交时间");
         table.getColumnModel().getColumn(6).setHeaderValue("确认时间");
-        table.getColumnModel().getColumn(7).setHeaderValue("收货时间");
-        table.getColumnModel().getColumn(8).setHeaderValue("订单状态");
+        table.getColumnModel().getColumn(7).setHeaderValue("出仓时间");
+        table.getColumnModel().getColumn(8).setHeaderValue("收货时间");
+        table.getColumnModel().getColumn(9).setHeaderValue("订单状态");
     }
 
     //查询正在进行中的订单
@@ -654,7 +655,7 @@ public class SalesmanUI extends OperationUI {
 //        }
         if (userID.equals("") && !searchText.equals("")) {
             preparedStatement = connection.prepareStatement("" +
-                    "SELECT o_id , m_order.g_id , g_name , m_order.amount , u_id , submit_time , ship_time , receipt_time , status " +
+                    "SELECT o_id , m_order.g_id , g_name , m_order.amount , u_id , submit_time , confirm_time , ship_time , receipt_time , status " +
                     "FROM m_order , good " +
                     "WHERE m_order.g_id=good.g_id AND (g_name=? OR m_order.g_id=?) " +
                     "ORDER BY o_id");
@@ -673,11 +674,12 @@ public class SalesmanUI extends OperationUI {
             table.getColumnModel().getColumn(4).setHeaderValue("订单用户");
             table.getColumnModel().getColumn(5).setHeaderValue("提交时间");
             table.getColumnModel().getColumn(6).setHeaderValue("确认时间");
-            table.getColumnModel().getColumn(7).setHeaderValue("收货时间");
-            table.getColumnModel().getColumn(8).setHeaderValue("订单状态");
+            table.getColumnModel().getColumn(7).setHeaderValue("出仓时间");
+            table.getColumnModel().getColumn(8).setHeaderValue("收货时间");
+            table.getColumnModel().getColumn(9).setHeaderValue("订单状态");
         } else if (!userID.equals("") && searchText.equals("")) {
             preparedStatement = connection.prepareStatement("" +
-                    "SELECT o_id , m_order.g_id , g_name , m_order.amount , u_id , submit_time , ship_time , receipt_time , status " +
+                    "SELECT o_id , m_order.g_id , g_name , m_order.amount , u_id , submit_time , confirm_time , ship_time , receipt_time , status " +
                     "FROM m_order , good " +
                     "WHERE m_order.g_id=good.g_id AND u_id=? " +
                     "ORDER BY o_id");
@@ -695,11 +697,12 @@ public class SalesmanUI extends OperationUI {
             table.getColumnModel().getColumn(4).setHeaderValue("订单用户");
             table.getColumnModel().getColumn(5).setHeaderValue("提交时间");
             table.getColumnModel().getColumn(6).setHeaderValue("确认时间");
-            table.getColumnModel().getColumn(7).setHeaderValue("收货时间");
-            table.getColumnModel().getColumn(8).setHeaderValue("订单状态");
+            table.getColumnModel().getColumn(7).setHeaderValue("出仓时间");
+            table.getColumnModel().getColumn(8).setHeaderValue("收货时间");
+            table.getColumnModel().getColumn(9).setHeaderValue("订单状态");
         } else if (!userID.equals("") && !searchText.equals("")) {
             preparedStatement = connection.prepareStatement("" +
-                    "SELECT o_id , m_order.g_id , g_name , m_order.amount , u_id , submit_time , ship_time , receipt_time , status " +
+                    "SELECT o_id , m_order.g_id , g_name , m_order.amount , u_id , submit_time , confirm_time , ship_time , receipt_time , status " +
                     "FROM m_order , good " +
                     "WHERE m_order.g_id=good.g_id AND u_id=? AND (g_name=? OR m_order.g_id=?) " +
                     "ORDER BY o_id");
@@ -719,8 +722,9 @@ public class SalesmanUI extends OperationUI {
             table.getColumnModel().getColumn(4).setHeaderValue("订单用户");
             table.getColumnModel().getColumn(5).setHeaderValue("提交时间");
             table.getColumnModel().getColumn(6).setHeaderValue("确认时间");
-            table.getColumnModel().getColumn(7).setHeaderValue("收货时间");
-            table.getColumnModel().getColumn(8).setHeaderValue("订单状态");
+            table.getColumnModel().getColumn(7).setHeaderValue("出仓时间");
+            table.getColumnModel().getColumn(8).setHeaderValue("收货时间");
+            table.getColumnModel().getColumn(9).setHeaderValue("订单状态");
         }
     }
 
@@ -732,6 +736,10 @@ public class SalesmanUI extends OperationUI {
         int orderAmount = 0;
         int goodID = 0;
         int goodAmount = -1;
+        if(userID.equals("")){
+            JOptionPane.showMessageDialog(null, "请输入用户名称", "错误", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         try {
             orderAmount = Integer.valueOf(newOrderPanel.getGoodAmount());
         } catch (NumberFormatException e) {
@@ -792,6 +800,8 @@ public class SalesmanUI extends OperationUI {
                 System.out.println("商品库存不足");
                 JOptionPane.showMessageDialog(null, "商品库存不足", "错误", JOptionPane.ERROR_MESSAGE);
             }
+        } else {
+            JOptionPane.showMessageDialog(null, "请输入正确的订单数量", "错误", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -960,7 +970,7 @@ public class SalesmanUI extends OperationUI {
             preparedStatement.setInt(3, o_id);
             int i = preparedStatement.executeUpdate();
             System.out.println("确认" + i + "条订单");
-            JOptionPane.showMessageDialog(null, "确认" + i + "条订单", null, JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, "确认" + i + "条订单", "确认成功", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 

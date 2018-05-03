@@ -141,6 +141,10 @@ public class CustomerUI extends OperationUI {
             JOptionPane.showMessageDialog(null, "订单数量输入错误，请输入正确的订单数量", "错误", JOptionPane.ERROR_MESSAGE);
             return;
         }
+        if(orderAmount <= 0){
+            JOptionPane.showMessageDialog(null, "订单数量输入错误，请输入正确的订单数量", "错误", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         Connection connection = SqlControler.getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement("" +
                 "SELECT g_id , amount FROM good " +
