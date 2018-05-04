@@ -12,6 +12,7 @@ import java.sql.SQLException;
 
 import com.GUI.customer.CustomerUI;
 import com.GUI.distributor.DistributorUI;
+import com.GUI.manager.ManagerUI;
 import com.GUI.salesman.SalesmanUI;
 import com.GUI.storekeeper.StoreKeeperUI;
 import com.main.Client;

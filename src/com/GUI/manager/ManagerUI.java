@@ -1,4 +1,6 @@
-package com.GUI;
+package com.GUI.manager;
+
+import com.GUI.OperationUI;
 
 public class ManagerUI extends OperationUI {
     @Override

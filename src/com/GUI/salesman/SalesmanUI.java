@@ -303,7 +303,7 @@ public class SalesmanUI extends OperationUI {
 //            @Override
 //            public void actionPerformed(ActionEvent e) {
 //                try {
-//                    searchSubmittedOrder();
+//                    searchConfirmedOrder();
 //                } catch (SQLException e1) {
 //                    e1.printStackTrace();
 //                }

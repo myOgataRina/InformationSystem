@@ -45,7 +45,7 @@ public class StoreKeeperUI extends OperationUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    searchSubmittedOrder();
+                    searchConfirmedOrder();
                 } catch (SQLException e1) {
                     e1.printStackTrace();
                 }
@@ -76,8 +76,8 @@ public class StoreKeeperUI extends OperationUI {
         frame.pack();
     }
 
-    //搜索已经提交的订单
-    public void searchSubmittedOrder() throws SQLException {
+    //搜索已经确认的订单
+    public void searchConfirmedOrder() throws SQLException {
         int status = 0;
         int o_id = 0;
         try {
