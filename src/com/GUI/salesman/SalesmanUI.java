@@ -75,6 +75,8 @@ public class SalesmanUI extends OperationUI {
             public void actionPerformed(ActionEvent e) {
                 try {
                     confirmSubmittedOrder();
+                    refreshSubmittedOrderList();
+                    refreshProcessingOrder();
                 } catch (SQLException e1) {
                     e1.printStackTrace();
                 }
@@ -612,7 +614,7 @@ public class SalesmanUI extends OperationUI {
                 "SELECT o_id , m_order.g_id , g_name , m_order.amount , u_id , submit_time , confirm_time , ship_time , receipt_time , status " +
                 "FROM m_order , good " +
                 "WHERE m_order.g_id=good.g_id " +
-                "ORDER BY o_id");
+                "ORDER BY o_id DESC ");
         ResultSet resultSet = preparedStatement.executeQuery();
         ResultSetTableModel resultSetTableModel = new ResultSetTableModel(resultSet);
         JTable table = this.processingOrderPanel.getTable();
@@ -658,7 +660,7 @@ public class SalesmanUI extends OperationUI {
                     "SELECT o_id , m_order.g_id , g_name , m_order.amount , u_id , submit_time , confirm_time , ship_time , receipt_time , status " +
                     "FROM m_order , good " +
                     "WHERE m_order.g_id=good.g_id AND (g_name=? OR m_order.g_id=?) " +
-                    "ORDER BY o_id");
+                    "ORDER BY o_id DESC ");
             preparedStatement.setString(1, goodName);
             preparedStatement.setInt(2, goodID);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -682,7 +684,7 @@ public class SalesmanUI extends OperationUI {
                     "SELECT o_id , m_order.g_id , g_name , m_order.amount , u_id , submit_time , confirm_time , ship_time , receipt_time , status " +
                     "FROM m_order , good " +
                     "WHERE m_order.g_id=good.g_id AND u_id=? " +
-                    "ORDER BY o_id");
+                    "ORDER BY o_id DESC ");
             preparedStatement.setString(1, userID);
             ResultSet resultSet = preparedStatement.executeQuery();
             ResultSetTableModel resultSetTableModel = new ResultSetTableModel(resultSet);
@@ -705,7 +707,7 @@ public class SalesmanUI extends OperationUI {
                     "SELECT o_id , m_order.g_id , g_name , m_order.amount , u_id , submit_time , confirm_time , ship_time , receipt_time , status " +
                     "FROM m_order , good " +
                     "WHERE m_order.g_id=good.g_id AND u_id=? AND (g_name=? OR m_order.g_id=?) " +
-                    "ORDER BY o_id");
+                    "ORDER BY o_id DESC ");
             preparedStatement.setString(1, userID);
             preparedStatement.setString(2, goodName);
             preparedStatement.setInt(3, goodID);
@@ -810,7 +812,7 @@ public class SalesmanUI extends OperationUI {
         Connection connection = SqlControler.getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement("" +
                 "SELECT * FROM good " +
-                "ORDER BY g_id");
+                "ORDER BY g_id DESC ");
         ResultSet resultSet = preparedStatement.executeQuery();
         ResultSetTableModel resultSetTableModel = new ResultSetTableModel(resultSet);
         JTable table = this.newOrderPanel.getTable();
@@ -853,13 +855,13 @@ public class SalesmanUI extends OperationUI {
                 "SELECT o_id , u_id ,  m_order.g_id , g_name , m_order.amount , status , submit_time " +
                 "FROM good , m_order " +
                 "WHERE status = '订单已提交' AND m_order.g_id=good.g_id " +
-                "ORDER BY o_id");
+                "ORDER BY o_id DESC ");
         if (status == 1) {
             preparedStatement = connection.prepareStatement("" +
                     "SELECT o_id , u_id ,  m_order.g_id , g_name , m_order.amount , status , submit_time " +
                     "FROM good , m_order " +
                     "WHERE status = '订单已提交' AND m_order.g_id=good.g_id AND g_name=? " +
-                    "ORDER BY o_id");
+                    "ORDER BY o_id DESC ");
             preparedStatement.setString(1, goodName);
         }
         if (status == 2) {
@@ -867,7 +869,7 @@ public class SalesmanUI extends OperationUI {
                     "SELECT o_id ,  u_id , m_order.g_id , g_name , m_order.amount , status , submit_time " +
                     "FROM good , m_order " +
                     "WHERE status = '订单已提交' AND m_order.g_id=good.g_id AND u_id=? " +
-                    "ORDER BY o_id");
+                    "ORDER BY o_id DESC ");
             preparedStatement.setString(1, u_id);
         }
         if (status == 3) {
@@ -875,7 +877,7 @@ public class SalesmanUI extends OperationUI {
                     "SELECT o_id , u_id ,  m_order.g_id , g_name , m_order.amount , status , submit_time " +
                     "FROM good , m_order " +
                     "WHERE status = '订单已提交' AND m_order.g_id=good.g_id AND g_name=? AND u_id=? " +
-                    "ORDER BY o_id");
+                    "ORDER BY o_id DESC ");
             preparedStatement.setString(1, goodName);
             preparedStatement.setString(2, u_id);
         }
@@ -884,7 +886,7 @@ public class SalesmanUI extends OperationUI {
                     "SELECT o_id , u_id ,  m_order.g_id , g_name , m_order.amount , status , submit_time " +
                     "FROM good , m_order " +
                     "WHERE status = '订单已提交' AND m_order.g_id=good.g_id AND o_id=? " +
-                    "ORDER BY o_id");
+                    "ORDER BY o_id DESC ");
             preparedStatement.setInt(1, o_id);
         }
         if (status == 5) {
@@ -892,7 +894,7 @@ public class SalesmanUI extends OperationUI {
                     "SELECT o_id ,  u_id , m_order.g_id , g_name , m_order.amount , status , submit_time " +
                     "FROM good , m_order " +
                     "WHERE status = '订单已提交' AND m_order.g_id=good.g_id AND o_id=? AND g_name=? " +
-                    "ORDER BY o_id");
+                    "ORDER BY o_id DESC ");
             preparedStatement.setInt(1, o_id);
             preparedStatement.setString(2, goodName);
         }
@@ -901,7 +903,7 @@ public class SalesmanUI extends OperationUI {
                     "SELECT o_id , u_id , m_order.g_id , g_name , m_order.amount , status , submit_time " +
                     "FROM good , m_order " +
                     "WHERE status = '订单已提交' AND m_order.g_id=good.g_id AND o_id=? AND u_id=? " +
-                    "ORDER BY o_id");
+                    "ORDER BY o_id DESC ");
             preparedStatement.setInt(1, o_id);
             preparedStatement.setString(2, u_id);
         }
@@ -910,7 +912,7 @@ public class SalesmanUI extends OperationUI {
                     "SELECT o_id , u_id , m_order.g_id , g_name , m_order.amount , status , submit_time " +
                     "FROM good , m_order " +
                     "WHERE status = '订单已提交' AND m_order.g_id=good.g_id AND o_id=? AND u_id=? AND g_name=? " +
-                    "ORDER BY o_id");
+                    "ORDER BY o_id DESC ");
             preparedStatement.setInt(1, o_id);
             preparedStatement.setString(2, u_id);
             preparedStatement.setString(3, goodName);
@@ -982,7 +984,7 @@ public class SalesmanUI extends OperationUI {
                     "SELECT o_id , u_id ,  m_order.g_id , g_name , m_order.amount , status , submit_time " +
                     "FROM good , m_order " +
                     "WHERE status = '订单已提交' AND m_order.g_id=good.g_id " +
-                    "ORDER BY o_id");
+                    "ORDER BY o_id DESC ");
             ResultSet resultSet = preparedStatement.executeQuery();
             ResultSetTableModel resultSetTableModel = new ResultSetTableModel(resultSet);
             JTable jTable = this.confirmationPanel.getTable();

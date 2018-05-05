@@ -55,7 +55,7 @@ public class StoreKeeperUI extends OperationUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    shipConfirmedOrder();
+                    exitConfirmedOrder();
                     refreshConfirmedOrderList();
                 } catch (SQLException e1) {
                     e1.printStackTrace();
@@ -77,7 +77,7 @@ public class StoreKeeperUI extends OperationUI {
     }
 
     //搜索已经确认的订单
-    public void searchConfirmedOrder() throws SQLException {
+    private void searchConfirmedOrder() throws SQLException {
         int status = 0;
         int o_id = 0;
         try {
@@ -107,13 +107,13 @@ public class StoreKeeperUI extends OperationUI {
                 "SELECT o_id , u_id ,  m_order.g_id , g_name , m_order.amount , status , confirm_time " +
                 "FROM good , m_order " +
                 "WHERE status = '订单已确认' AND m_order.g_id=good.g_id " +
-                "ORDER BY o_id");
+                "ORDER BY o_id DESC ");
         if (status == 1) {
             preparedStatement = connection.prepareStatement("" +
                     "SELECT o_id , u_id ,  m_order.g_id , g_name , m_order.amount , status , confirm_time " +
                     "FROM good , m_order " +
                     "WHERE status = '订单已确认' AND m_order.g_id=good.g_id AND g_name=? " +
-                    "ORDER BY o_id");
+                    "ORDER BY o_id DESC ");
             preparedStatement.setString(1, goodName);
         }
         if (status == 2) {
@@ -121,7 +121,7 @@ public class StoreKeeperUI extends OperationUI {
                     "SELECT o_id ,  u_id , m_order.g_id , g_name , m_order.amount , status , confirm_time " +
                     "FROM good , m_order " +
                     "WHERE status = '订单已确认' AND m_order.g_id=good.g_id AND u_id=? " +
-                    "ORDER BY o_id");
+                    "ORDER BY o_id DESC ");
             preparedStatement.setString(1, u_id);
         }
         if (status == 3) {
@@ -129,7 +129,7 @@ public class StoreKeeperUI extends OperationUI {
                     "SELECT o_id , u_id ,  m_order.g_id , g_name , m_order.amount , status , confirm_time " +
                     "FROM good , m_order " +
                     "WHERE status = '订单已确认' AND m_order.g_id=good.g_id AND g_name=? AND u_id=? " +
-                    "ORDER BY o_id");
+                    "ORDER BY o_id DESC ");
             preparedStatement.setString(1, goodName);
             preparedStatement.setString(2, u_id);
         }
@@ -138,7 +138,7 @@ public class StoreKeeperUI extends OperationUI {
                     "SELECT o_id , u_id ,  m_order.g_id , g_name , m_order.amount , status , confirm_time " +
                     "FROM good , m_order " +
                     "WHERE status = '订单已确认' AND m_order.g_id=good.g_id AND o_id=? " +
-                    "ORDER BY o_id");
+                    "ORDER BY o_id DESC ");
             preparedStatement.setInt(1, o_id);
         }
         if (status == 5) {
@@ -146,7 +146,7 @@ public class StoreKeeperUI extends OperationUI {
                     "SELECT o_id ,  u_id , m_order.g_id , g_name , m_order.amount , status , confirm_time " +
                     "FROM good , m_order " +
                     "WHERE status = '订单已确认' AND m_order.g_id=good.g_id AND o_id=? AND g_name=? " +
-                    "ORDER BY o_id");
+                    "ORDER BY o_id DESC ");
             preparedStatement.setInt(1, o_id);
             preparedStatement.setString(2, goodName);
         }
@@ -155,7 +155,7 @@ public class StoreKeeperUI extends OperationUI {
                     "SELECT o_id , u_id , m_order.g_id , g_name , m_order.amount , status , confirm_time " +
                     "FROM good , m_order " +
                     "WHERE status = '订单已确认' AND m_order.g_id=good.g_id AND o_id=? AND u_id=? " +
-                    "ORDER BY o_id");
+                    "ORDER BY o_id DESC ");
             preparedStatement.setInt(1, o_id);
             preparedStatement.setString(2, u_id);
         }
@@ -164,7 +164,7 @@ public class StoreKeeperUI extends OperationUI {
                     "SELECT o_id , u_id , m_order.g_id , g_name , m_order.amount , status , confirm_time " +
                     "FROM good , m_order " +
                     "WHERE status = '订单已确认' AND m_order.g_id=good.g_id AND o_id=? AND u_id=? AND g_name=? " +
-                    "ORDER BY o_id");
+                    "ORDER BY o_id DESC ");
             preparedStatement.setInt(1, o_id);
             preparedStatement.setString(2, u_id);
             preparedStatement.setString(3, goodName);
@@ -185,7 +185,7 @@ public class StoreKeeperUI extends OperationUI {
         jTable.getColumnModel().getColumn(6).setHeaderValue("订单确认时间");
     }
 
-    public void shipConfirmedOrder() throws SQLException {
+    private void exitConfirmedOrder() throws SQLException {
         int o_id = -1;
         //输入为空则直接退出
         if (this.shippingPanel.getO_id().equals("")) {
@@ -223,6 +223,28 @@ public class StoreKeeperUI extends OperationUI {
             preparedStatement.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
             preparedStatement.setInt(3, o_id);
             int i = preparedStatement.executeUpdate();
+
+            preparedStatement = connection.prepareStatement("" +
+                    "SELECT phone , g_id , amount , m_order.u_id " +
+                    "FROM user , m_order " +
+                    "WHERE m_order.u_id=user.u_id AND m_order.o_id=?");
+            preparedStatement.setInt(1, o_id);
+            ResultSet resultSet1 = preparedStatement.executeQuery();
+            String phone = null;
+            int g_id = 0;
+            int amount = 0;
+            String u_id = null;
+            if (resultSet1.next()) {
+                phone = resultSet1.getString(1);
+                g_id = resultSet1.getInt(2);
+                amount = resultSet1.getInt(3);
+                u_id = resultSet1.getString(4);
+                SqlControler.Storehouse.exit(g_id, amount, 0, u_id, phone, Client.u_id);
+            } else {
+                JOptionPane.showMessageDialog(null, "出仓记录写入失败", "出仓记录失败", JOptionPane.ERROR_MESSAGE);
+            }
+
+
             System.out.println("出仓" + i + "条订单");
             JOptionPane.showMessageDialog(null, "出仓" + i + "条订单", "出仓成功", JOptionPane.INFORMATION_MESSAGE);
         }
@@ -235,7 +257,8 @@ public class StoreKeeperUI extends OperationUI {
             preparedStatement = connection.prepareStatement("" +
                     "SELECT o_id , u_id ,  m_order.g_id , g_name , m_order.amount , status , confirm_time " +
                     "FROM good , m_order " +
-                    "WHERE status = '订单已确认' AND m_order.g_id=good.g_id");
+                    "WHERE status = '订单已确认' AND m_order.g_id=good.g_id " +
+                    "ORDER BY o_id DESC ");
             ResultSet resultSet = preparedStatement.executeQuery();
             ResultSetTableModel resultSetTableModel = new ResultSetTableModel(resultSet);
             JTable jTable = this.shippingPanel.getTable();
@@ -261,7 +284,8 @@ public class StoreKeeperUI extends OperationUI {
         try {
             preparedStatement = connection.prepareStatement("" +
                     "SELECT * " +
-                    "FROM good ");
+                    "FROM good " +
+                    "ORDER BY g_id DESC ");
             ResultSet resultSet = preparedStatement.executeQuery();
             ResultSetTableModel resultSetTableModel = new ResultSetTableModel(resultSet);
             JTable jTable = this.entryPanel.getTable();

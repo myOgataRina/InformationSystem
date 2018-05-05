@@ -56,7 +56,7 @@ public class NewOrderPanel extends JPanel {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("" +
                     "SELECT * FROM good " +
-                    "ORDER BY g_id");
+                    "ORDER BY g_id DESC ");
             ResultSet resultSet = preparedStatement.executeQuery();
             ResultSetTableModel resultSetTableModel = new ResultSetTableModel(resultSet);
             table = new JTable(resultSetTableModel);

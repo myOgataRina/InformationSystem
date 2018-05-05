@@ -1,6 +1,6 @@
 package com.main;
 
-import com.GUI.LoginUI;
+import com.GUI.login.LoginUI;
 
 public class Client {
     public static String u_id;

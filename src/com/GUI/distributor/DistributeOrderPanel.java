@@ -16,7 +16,7 @@ public class DistributeOrderPanel extends JPanel {
     private JTextField userTextField = new JTextField(20);
     private JTextField goodTextField = new JTextField(20);
     private JButton searchButton = new JButton("查询");
-    private JButton shippingButton = new JButton("订单出货");
+    private JButton shippingButton = new JButton("订单揽件");
 
     private JTable jTable = new JTable();
 

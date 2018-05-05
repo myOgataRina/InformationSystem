@@ -94,7 +94,8 @@ public class EntryOrExitPanel extends JPanel {
         Connection connection = SqlControler.getConnection();
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("" +
-                    "SELECT * FROM good");
+                    "SELECT * FROM good " +
+                    "ORDER BY g_id DESC ");
             resultSet = preparedStatement.executeQuery();
             resultSetTableModel = new ResultSetTableModel(resultSet);
             table = new JTable(resultSetTableModel);

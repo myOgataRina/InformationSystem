@@ -68,7 +68,7 @@ public class DistributorUI extends OperationUI {
         frame.setVisible(true);
     }
 
-    public void distributeExitedOrder() throws SQLException {
+    private void distributeExitedOrder() throws SQLException {
         int o_id = -1;
         //输入为空则直接退出
         if (this.distributeOrderPanel.getO_id().equals("")) {
@@ -119,7 +119,7 @@ public class DistributorUI extends OperationUI {
     }
 
     //搜索已经出仓的订单
-    public void searchExitOrder() throws SQLException {
+    private void searchExitOrder() throws SQLException {
         int status = 0;
         int o_id = 0;
         try {
@@ -254,7 +254,7 @@ public class DistributorUI extends OperationUI {
         }
     }
 
-    public void searchDistributingOrder() throws SQLException {
+    private void searchDistributingOrder() throws SQLException {
         int status = 0;
         int o_id = 0;
         try {

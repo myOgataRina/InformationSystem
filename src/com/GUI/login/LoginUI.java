@@ -1,4 +1,4 @@
-package com.GUI;
+package com.GUI.login;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.GUI.OperationUI;
 import com.GUI.customer.CustomerUI;
 import com.GUI.distributor.DistributorUI;
 import com.GUI.manager.ManagerUI;
@@ -213,31 +214,12 @@ public class LoginUI {
     private class SignUpListener extends ComponentAdapter implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
+            Client.u_id = accountTF.getText();
+            Client.password = new String(passwordTF.getPassword());
             System.out.println("注册中");
             selectedType = (String) type.getSelectedItem();
             if (selectedType.equals("客户")) {
-                try {
-                    PreparedStatement preparedStatement = null;
-                    preparedStatement = connection.prepareStatement("INSERT INTO user(u_id , password, power) VALUES (?,?,\"customer\")");
-                    Client.u_id = accountTF.getText();
-                    Client.password = new String(passwordTF.getPassword());
-                    preparedStatement.setString(1, Client.u_id);
-                    preparedStatement.setString(2, Client.password);
-                    if (preparedStatement.executeUpdate() == 1) {
-                        //弹出提示
-                        System.out.println("用户添加成功");
-                        JOptionPane.showMessageDialog(null, "用户添加成功", "注册", JOptionPane.INFORMATION_MESSAGE);
-                    } else {
-                        System.out.println("用户添加失败");
-                        JOptionPane.showMessageDialog(null, "用户添加失败", "注册", JOptionPane.WARNING_MESSAGE);
-                    }
-                } catch (SQLException e1) {
-                    //增加unique约束时，重复注册用户名会报错。
-                    e1.printStackTrace();
-                    System.out.println(e1.getMessage());
-                    JOptionPane.showMessageDialog(null, e1.getMessage(), "注册", JOptionPane.WARNING_MESSAGE);
-                }
-
+                SignUpFrame signUpFrame = new SignUpFrame();
             } else {
                 //弹出窗口显示非客户不能注册
                 System.out.println("注册权限不足，非客户用户请与总部联系。");

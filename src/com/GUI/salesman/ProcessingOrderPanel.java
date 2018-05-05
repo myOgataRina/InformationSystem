@@ -50,7 +50,7 @@ public class ProcessingOrderPanel extends JPanel {
                     "SELECT o_id , m_order.g_id , g_name , m_order.amount , u_id , submit_time , confirm_time , ship_time , receipt_time , status " +
                     "FROM m_order , good " +
                     "WHERE m_order.g_id=good.g_id " +
-                    "ORDER BY o_id");
+                    "ORDER BY o_id DESC ");
             ResultSet resultSet = preparedStatement.executeQuery();
             ResultSetTableModel resultSetTableModel = new ResultSetTableModel(resultSet);
             table = new JTable(resultSetTableModel);

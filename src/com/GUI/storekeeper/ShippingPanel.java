@@ -75,7 +75,7 @@ public class ShippingPanel extends JPanel {
                     "SELECT o_id , u_id , m_order.g_id , g_name , m_order.amount , status , confirm_time " +
                     "FROM good , m_order " +
                     "WHERE status = '订单已确认' AND m_order.g_id=good.g_id " +
-                    "ORDER BY o_id");
+                    "ORDER BY o_id DESC ");
             ResultSet resultSet = preparedStatement.executeQuery();
             ResultSetTableModel resultSetTableModel = new ResultSetTableModel(resultSet);
             jTable.setModel(resultSetTableModel);
