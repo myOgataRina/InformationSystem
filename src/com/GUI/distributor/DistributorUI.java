@@ -2,26 +2,60 @@ package com.GUI.distributor;
 
 import com.GUI.OperationUI;
 import com.GUI.university.ChangeInformationPanel;
+import com.main.Client;
 import com.util.ResultSetTableModel;
 import com.util.SqlControler;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentListener;
 import java.sql.*;
 
 public class DistributorUI extends OperationUI {
     private JFrame frame = new JFrame("快递员界面");
-    DistributeOrderPanel distributeOrderPanel = new DistributeOrderPanel();
+    private DistributeOrderPanel distributeOrderPanel = new DistributeOrderPanel();
+    private SearchDistributingOrderPanel searchDistributingOrderPanel = new SearchDistributingOrderPanel();
 
-    public DistributorUI(){
+    public DistributorUI() {
         ChangeInformationPanel changeInformationPanel = new ChangeInformationPanel();
 
-//        distributeOrderPanel
+        distributeOrderPanel.setSearchButtonListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    searchExitOrder();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+
+        distributeOrderPanel.setShippingButtonListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    distributeExitedOrder();
+                    refreshExitedOrderList();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+
+        searchDistributingOrderPanel.setSearchButtonListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
 
         changeInformationPanel.setChangePasswordButtonListener();
         changeInformationPanel.setChangeInformationButtonListener();
 
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.add("订单揽件", distributeOrderPanel);
+        tabbedPane.add("派送中的订单", searchDistributingOrderPanel);
         tabbedPane.add("个人信息修改", changeInformationPanel);
 
         frame.add(tabbedPane);
@@ -66,12 +100,19 @@ public class DistributorUI extends OperationUI {
         } else {
             preparedStatement = connection.prepareStatement("" +
                     "UPDATE m_order " +
-                    "set status=? , exit_time=? " +
+                    "set status=? , ship_time=? " +
                     "WHERE o_id=?");
             preparedStatement.setString(1, "订单配送中");
             preparedStatement.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
             preparedStatement.setInt(3, o_id);
             int i = preparedStatement.executeUpdate();
+
+            preparedStatement = connection.prepareStatement("" +
+                    "INSERT INTO ship(o_id,u_id) " +
+                    "VALUES(?,?)");
+            preparedStatement.setInt(1, o_id);
+            preparedStatement.setString(2, Client.u_id);
+            preparedStatement.executeUpdate();
             System.out.println("已揽件" + i + "条订单");
             JOptionPane.showMessageDialog(null, "揽件" + i + "条订单", "揽件成功", JOptionPane.INFORMATION_MESSAGE);
         }
@@ -83,8 +124,8 @@ public class DistributorUI extends OperationUI {
         int o_id = 0;
         try {
             o_id = Integer.valueOf(this.distributeOrderPanel.getO_id());
-        } catch (NumberFormatException e) {//当输入不为数字时
-            e.printStackTrace();
+        } catch (NumberFormatException e) {
+            //当输入不为数字时
             if (!this.distributeOrderPanel.getO_id().equals("")) {
                 System.out.println("请确认输入的订单编号格式是否正确");
                 JOptionPane.showMessageDialog(null, "请确认输入的订单编号格式是否正确", "警告", JOptionPane.WARNING_MESSAGE);
@@ -184,5 +225,140 @@ public class DistributorUI extends OperationUI {
         jTable.getColumnModel().getColumn(4).setHeaderValue("订购数量");
         jTable.getColumnModel().getColumn(5).setHeaderValue("订单状态");
         jTable.getColumnModel().getColumn(6).setHeaderValue("订单出仓时间");
+    }
+
+    private void refreshExitedOrderList() {
+        Connection connection = SqlControler.getConnection();
+        PreparedStatement preparedStatement;
+        try {
+            preparedStatement = connection.prepareStatement("" +
+                    "SELECT o_id , u_id ,  m_order.g_id , g_name , m_order.amount , status , confirm_time " +
+                    "FROM good , m_order " +
+                    "WHERE status = '订单已出仓' AND m_order.g_id=good.g_id");
+            ResultSet resultSet = preparedStatement.executeQuery();
+            ResultSetTableModel resultSetTableModel = new ResultSetTableModel(resultSet);
+            JTable jTable = this.distributeOrderPanel.getTable();
+            jTable.setModel(resultSetTableModel);
+            resultSetTableModel.fireTableStructureChanged();
+            resultSetTableModel.fireTableDataChanged();
+            jTable.getColumnModel().getColumn(0).setHeaderValue("订单编号");
+            jTable.getColumnModel().getColumn(1).setHeaderValue("订单用户");
+            jTable.getColumnModel().getColumn(2).setHeaderValue("商品编号");
+            jTable.getColumnModel().getColumn(3).setHeaderValue("商品名称");
+            jTable.getColumnModel().getColumn(4).setHeaderValue("订购数量");
+            jTable.getColumnModel().getColumn(5).setHeaderValue("订单状态");
+            jTable.getColumnModel().getColumn(6).setHeaderValue("订单出仓时间");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void searchDistributingOrder() throws SQLException {
+        int status = 0;
+        int o_id = 0;
+        try {
+            o_id = Integer.valueOf(this.searchDistributingOrderPanel.getO_id());
+        } catch (NumberFormatException e) {
+            //当输入不为数字时
+            if (!this.searchDistributingOrderPanel.getO_id().equals("")) {
+                System.out.println("请确认输入的订单编号格式是否正确");
+                JOptionPane.showMessageDialog(null, "请确认输入的订单编号格式是否正确", "警告", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+        }
+        String u_id = this.searchDistributingOrderPanel.getU_id();
+        String goodName = this.searchDistributingOrderPanel.getGoodName();
+        PreparedStatement preparedStatement;
+        if (!this.searchDistributingOrderPanel.getO_id().equals("")) {
+            status = status + 4;
+        }
+        if (!u_id.equals("")) {
+            status = status + 2;
+        }
+        if (!goodName.equals("")) {
+            status = status + 1;
+        }
+        Connection connection = SqlControler.getConnection();
+        preparedStatement = connection.prepareStatement("" +
+                "SELECT m_order.o_id , m_order.u_id , m_order.g_id , g_name , m_order.amount , status , ship_time " +
+                "FROM good , m_order " +
+                "WHERE status = '订单配送中' AND m_order.g_id=good.g_id AND m_order.o_id=ship.o_id " +
+                "ORDER BY o_id DESC");
+        if (status == 1) {
+            preparedStatement = connection.prepareStatement("" +
+                    "SELECT m_order.o_id , m_order.u_id , m_order.g_id , g_name , m_order.amount , status , ship_time " +
+                    "FROM good , m_order " +
+                    "WHERE status = '订单配送中' AND m_order.g_id=good.g_id AND g_name=? AND m_order.o_id=ship.o_id " +
+                    "ORDER BY o_id DESC");
+            preparedStatement.setString(1, goodName);
+        }
+        if (status == 2) {
+            preparedStatement = connection.prepareStatement("" +
+                    "SELECT m_order.o_id , m_order.u_id , m_order.g_id , g_name , m_order.amount , status , ship_time " +
+                    "FROM good , m_order " +
+                    "WHERE status = '订单配送中' AND m_order.g_id=good.g_id AND u_id=? AND m_order.o_id=ship.o_id " +
+                    "ORDER BY o_id DESC");
+            preparedStatement.setString(1, u_id);
+        }
+        if (status == 3) {
+            preparedStatement = connection.prepareStatement("" +
+                    "SELECT m_order.o_id , m_order.u_id , m_order.g_id , g_name , m_order.amount , status , ship_time " +
+                    "FROM good , m_order " +
+                    "WHERE status = '订单配送中' AND m_order.g_id=good.g_id AND g_name=? AND u_id=? AND m_order.o_id=ship.o_id " +
+                    "ORDER BY o_id DESC");
+            preparedStatement.setString(1, goodName);
+            preparedStatement.setString(2, u_id);
+        }
+        if (status == 4) {
+            preparedStatement = connection.prepareStatement("" +
+                    "SELECT m_order.o_id , m_order.u_id , m_order.g_id , g_name , m_order.amount , status , ship_time " +
+                    "FROM good , m_order " +
+                    "WHERE status = '订单配送中' AND m_order.g_id=good.g_id AND o_id=? AND m_order.o_id=ship.o_id " +
+                    "ORDER BY o_id DESC");
+            preparedStatement.setInt(1, o_id);
+        }
+        if (status == 5) {
+            preparedStatement = connection.prepareStatement("" +
+                    "SELECT m_order.o_id , m_order.u_id , m_order.g_id , g_name , m_order.amount , status , ship_time " +
+                    "FROM good , m_order " +
+                    "WHERE status = '订单配送中' AND m_order.g_id=good.g_id AND o_id=? AND g_name=? AND m_order.o_id=ship.o_id " +
+                    "ORDER BY o_id DESC");
+            preparedStatement.setInt(1, o_id);
+            preparedStatement.setString(2, goodName);
+        }
+        if (status == 6) {
+            preparedStatement = connection.prepareStatement("" +
+                    "SELECT m_order.o_id , m_order.u_id , m_order.g_id , g_name , m_order.amount , status , ship_time " +
+                    "FROM good , m_order " +
+                    "WHERE status = '订单配送中' AND m_order.g_id=good.g_id AND o_id=? AND u_id=? AND m_order.o_id=ship.o_id " +
+                    "ORDER BY o_id DESC");
+            preparedStatement.setInt(1, o_id);
+            preparedStatement.setString(2, u_id);
+        }
+        if (status == 7) {
+            preparedStatement = connection.prepareStatement("" +
+                    "SELECT m_order.o_id , m_order.u_id , m_order.g_id , g_name , m_order.amount , status , ship_time " +
+                    "FROM good , m_order " +
+                    "WHERE status = '订单配送中' AND m_order.g_id=good.g_id AND o_id=? AND u_id=? AND g_name=? AND m_order.o_id=ship.o_id " +
+                    "ORDER BY o_id DESC");
+            preparedStatement.setInt(1, o_id);
+            preparedStatement.setString(2, u_id);
+            preparedStatement.setString(3, goodName);
+        }
+
+        ResultSet resultSet = preparedStatement.executeQuery();
+        ResultSetTableModel resultSetTableModel = new ResultSetTableModel(resultSet);
+        JTable jTable = this.searchDistributingOrderPanel.getTable();
+        jTable.setModel(resultSetTableModel);
+        resultSetTableModel.fireTableStructureChanged();
+        resultSetTableModel.fireTableDataChanged();
+        jTable.getColumnModel().getColumn(0).setHeaderValue("订单编号");
+        jTable.getColumnModel().getColumn(1).setHeaderValue("订单用户");
+        jTable.getColumnModel().getColumn(2).setHeaderValue("商品编号");
+        jTable.getColumnModel().getColumn(3).setHeaderValue("商品名称");
+        jTable.getColumnModel().getColumn(4).setHeaderValue("订购数量");
+        jTable.getColumnModel().getColumn(5).setHeaderValue("订单状态");
+        jTable.getColumnModel().getColumn(6).setHeaderValue("订单揽件时间");
     }
 }

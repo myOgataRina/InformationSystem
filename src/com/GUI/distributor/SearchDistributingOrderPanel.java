@@ -11,17 +11,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class DistributeOrderPanel extends JPanel {
+public class SearchDistributingOrderPanel extends JPanel {
     private JTextField orderTextField = new JTextField(20);
     private JTextField userTextField = new JTextField(20);
     private JTextField goodTextField = new JTextField(20);
     private JButton searchButton = new JButton("查询");
-    private JButton shippingButton = new JButton("订单出货");
 
     private JTable jTable = new JTable();
 
 
-    public DistributeOrderPanel() {
+    public SearchDistributingOrderPanel() {
         GridBagConstraints gbc = new GridBagConstraints();
         this.setLayout(new BorderLayout());
         gbc.insets = new Insets(40, 0, 0, 0);
@@ -48,17 +47,10 @@ public class DistributeOrderPanel extends JPanel {
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gb.setConstraints(goodTextField, gbc);
         containerPanel.add(goodTextField);
-        gbc.insets = new Insets(40, 20, 0, 20);
-        gbc.gridwidth = 1;
-        gb.setConstraints(searchButton, gbc);
-        JPanel buttonPanel = new JPanel(gb);
-        buttonPanel.add(searchButton);
+        gbc.insets = new Insets(40, 20, 20, 20);
         gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gb.setConstraints(shippingButton, gbc);
-        buttonPanel.add(shippingButton);
-        gbc.insets = new Insets(0, 0, 20, 0);
-        gb.setConstraints(buttonPanel, gbc);
-        containerPanel.add(buttonPanel);
+        gb.setConstraints(searchButton, gbc);
+        containerPanel.add(searchButton);
 
 
         JSeparator separator = new JSeparator(JSeparator.HORIZONTAL);
@@ -68,9 +60,9 @@ public class DistributeOrderPanel extends JPanel {
         JScrollPane confirmOrderPane = new JScrollPane();
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("" +
-                    "SELECT o_id , u_id , m_order.g_id , g_name , m_order.amount , status , exit_time " +
-                    "FROM good , m_order " +
-                    "WHERE status = '订单已出仓' AND m_order.g_id=good.g_id " +
+                    "SELECT m_order.o_id , m_order.u_id , m_order.g_id , g_name , m_order.amount , status , ship_time " +
+                    "FROM good , m_order , ship " +
+                    "WHERE status = '订单配送中' AND m_order.g_id=good.g_id AND m_order.o_id=ship.o_id " +
                     "ORDER BY o_id DESC ");
             ResultSet resultSet = preparedStatement.executeQuery();
             ResultSetTableModel resultSetTableModel = new ResultSetTableModel(resultSet);
@@ -81,7 +73,7 @@ public class DistributeOrderPanel extends JPanel {
             jTable.getColumnModel().getColumn(3).setHeaderValue("商品名称");
             jTable.getColumnModel().getColumn(4).setHeaderValue("订购数量");
             jTable.getColumnModel().getColumn(5).setHeaderValue("订单状态");
-            jTable.getColumnModel().getColumn(6).setHeaderValue("订单出仓时间");
+            jTable.getColumnModel().getColumn(6).setHeaderValue("订单揽件时间");
             confirmOrderPane = new JScrollPane(jTable);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -95,10 +87,6 @@ public class DistributeOrderPanel extends JPanel {
 
     public void setSearchButtonListener(ActionListener actionListener) {
         this.searchButton.addActionListener(actionListener);
-    }
-
-    public void setShippingButtonListener(ActionListener actionListener) {
-        this.shippingButton.addActionListener(actionListener);
     }
 
     public String getO_id() {
