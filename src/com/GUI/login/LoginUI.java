@@ -33,7 +33,7 @@ public class LoginUI {
     private JPasswordField passwordTF = new JPasswordField(20);
     private JPanel typeArea = new JPanel();
     private JLabel typeLabel = new JLabel("类  型：");
-    final private String[] TYPE_OF_USER = new String[]{"客户", "部门经理", "业务员", "仓库管理员", "配送员"};
+    final private String[] TYPE_OF_USER = new String[]{"客户", "经理", "业务员", "仓库管理员", "配送员"};
     private JComboBox<String> type = new JComboBox<>(TYPE_OF_USER);
     private String selectedType = "客户";
     private JPanel buttonArea = new JPanel();
@@ -153,7 +153,7 @@ public class LoginUI {
                     preparedStatement = connection.prepareStatement("SELECT * FROM USER WHERE u_id=? AND password=? AND power='customer'");
                     preparedStatement.setString(1, Client.u_id);
                     preparedStatement.setString(2, Client.password);
-                } else if (selectedType.equals("部门经理")) {
+                } else if (selectedType.equals("经理")) {
                     preparedStatement = connection.prepareStatement("SELECT * FROM USER WHERE u_id=? AND password=? AND power='manager'");
                     preparedStatement.setString(1, Client.u_id);
                     preparedStatement.setString(2, Client.password);
@@ -181,7 +181,7 @@ public class LoginUI {
                     OperationUI operationUI;
                     if (selectedType.equals("客户")) {
                         operationUI = new CustomerUI();
-                    } else if (selectedType.equals("部门经理")) {
+                    } else if (selectedType.equals("经理")) {
                         operationUI = new ManagerUI();
                     } else if (selectedType.equals("业务员")) {
                         operationUI = new SalesmanUI();
